@@ -15,9 +15,10 @@ class SiameseNet(nn.Module):
 
         self.fc = nn.Sequential(nn.Linear(692224, 256),
                                 nn.PReLU(),
-                                nn.Linear(256, 256),
-                                nn.PReLU(),
-                                nn.Linear(256, 2))
+                                nn.Linear(256, 256))
+
+        self.predict = nn.Sequential(nn.PReLU(),
+                                     nn.Linear(256, 2))
 
     def forward(self, x1, x2):
         output1 = self.forward_one(x1)
@@ -25,6 +26,11 @@ class SiameseNet(nn.Module):
         return output1, output2
 
     def forward_one(self, x):
+        output = self.embedding(x)
+        output = self.predict(output)
+        return output
+
+    def embedding(self, x):
         output = self.convnet(x)
         output = output.view(1, -1)
         output = self.fc(output)
