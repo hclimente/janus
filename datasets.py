@@ -1,11 +1,17 @@
 import random
 
+from torchvision import transforms
 from torch.utils.data import Dataset
+
+from transforms import RandomVerticalFlip,RandomHorizontalFlip,RandomRotation
 
 
 class MultiCellDataset (Dataset):
 
-    def __init__(self, dataset_1, dataset_2, transform=None):
+    def __init__(self, dataset_1, dataset_2,
+                 transform=transforms.Compose([RandomHorizontalFlip(),
+                                               RandomVerticalFlip(),
+                                               RandomRotation()])):
         self.dataset_1 = dataset_1
         self.dataset_2 = dataset_2
         self.transform = transform
@@ -36,14 +42,14 @@ class MultiCellDataset (Dataset):
 
 class Boyd2019(MultiCellDataset):
 
-    def __init__(self, path_mda231, path_mda468):
+    def __init__(self, path_mda231, path_mda468, transform):
 
         window_width = 32
 
         dataset_1 = self.load_dataset(path_mda231)
         dataset_2 = self.load_dataset(path_mda468)
 
-        super().__init__(dataset_1, dataset_2)
+        super().__init__(dataset_1, dataset_2, transform)
 
     def load_dataset(self, path):
         return path
