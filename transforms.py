@@ -31,7 +31,6 @@ class RandomRotation(object):
         pass
 
     def __call__(self, img):
-        for _ in range(np.randint(0, 4)):
-            img = np.rot90(img)
+        img = np.rot90(img, k=np.randint(0, 3))
 
         return img
