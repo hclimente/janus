@@ -13,7 +13,7 @@ class SiameseNet(nn.Module):
                                      nn.PReLU(),
                                      nn.MaxPool2d(2, stride=2))
 
-        self.fc = nn.Sequential(nn.Linear(692224, 256),
+        self.fc = nn.Sequential(nn.Linear(16384, 256),
                                 nn.PReLU(),
                                 nn.Linear(256, 256))
 
