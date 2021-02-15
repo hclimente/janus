@@ -3,7 +3,7 @@ import random
 from torchvision import transforms
 from torch.utils.data import Dataset
 
-from transforms import RandomVerticalFlip,RandomHorizontalFlip,RandomRotation
+from transforms import RandomVerticalFlip, RandomHorizontalFlip, RandomRotation
 
 
 class MultiCellDataset (Dataset):
@@ -34,7 +34,7 @@ class MultiCellDataset (Dataset):
             cell1 = self.transform(cell1)
             cell2 = self.transform(cell2)
 
-        return cell1, cell2, same_moa
+        return cell1, moa1, cell2, moa2, same_moa
 
     def __len__(self):
         return int(len(self.dataset_1) * len(self.dataset_2) / 2)
