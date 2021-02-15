@@ -17,8 +17,10 @@ class SiameseNet(nn.Module):
                                      nn.MaxPool2d(2, stride=2))
 
         self.fc = nn.Sequential(nn.Linear(64 * 8 * 8, 256),
+                                nn.Dropout(0.5),
                                 nn.PReLU(),
-                                nn.Linear(256, 256))
+                                nn.Linear(256, 256),
+                                nn.Dropout(0.5))
 
     def forward(self, x1, x2):
         output1 = self.embedding(x1)
