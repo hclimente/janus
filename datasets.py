@@ -36,7 +36,7 @@ class MultiCellDataset (Dataset):
 
     def __len__(self):
         # artificially limit epoch length
-        return 10000
+        return 100000
 
     def __sample_cells(self, moa1, same_moa):
         while True:
