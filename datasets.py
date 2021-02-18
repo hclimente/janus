@@ -3,12 +3,15 @@ import random
 from torchvision import transforms
 from torch.utils.data import Dataset
 
+from transforms import RandomRot90
+
 
 class MultiCellDataset (Dataset):
 
     def __init__(self, dataset_1, dataset_2,
                  transform=transforms.Compose([transforms.RandomHorizontalFlip(),
-                                               transforms.RandomVerticalFlip()])):
+                                               transforms.RandomVerticalFlip(),
+                                               RandomRot90()])):
 
         self.dataset_1 = dataset_1
         self.dataset_2 = dataset_2
