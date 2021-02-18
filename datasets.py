@@ -8,8 +8,7 @@ class MultiCellDataset (Dataset):
 
     def __init__(self, dataset_1, dataset_2,
                  transform=transforms.Compose([transforms.RandomHorizontalFlip(),
-                                               transforms.RandomVerticalFlip(),
-                                               transforms.RandomRotation(90)])):
+                                               transforms.RandomVerticalFlip()])):
 
         self.dataset_1 = dataset_1
         self.dataset_2 = dataset_2
@@ -21,12 +20,12 @@ class MultiCellDataset (Dataset):
 
         if balanced:
             moa1 = random.choice(self.moas)
-            cell1, moa1 = self.__sample_cells(moa1, True)
+            cell1, moa1 = self.__sample_cells(moa1, True, self.dataset_1)
         else:
             cell1, moa1 = random.choice(self.dataset_1)
 
         same_moa = random.getrandbits(1)
-        cell2, moa2 = self.__sample_cells(moa1, same_moa)
+        cell2, moa2 = self.__sample_cells(moa1, same_moa, self.dataset_2)
 
         if self.transform:
             cell1 = self.transform(cell1)
@@ -38,16 +37,16 @@ class MultiCellDataset (Dataset):
         # artificially limit epoch length
         return 100000
 
-    def __sample_cells(self, moa1, same_moa):
+    def __sample_cells(self, prev_moa, same_moa, dataset):
         while True:
-            cell2, moa2 = random.choice(self.dataset_2)
+            cell, moa = random.choice(dataset)
 
-            if same_moa and moa1 == moa2:
+            if same_moa and prev_moa == moa:
                 break
-            elif not same_moa and moa1 != moa2:
+            elif not same_moa and prev_moa != moa:
                 break
 
-        return cell2, moa2
+        return cell, moa
 
 
 class Boyd2019(MultiCellDataset):
