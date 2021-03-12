@@ -28,22 +28,25 @@ class HDF5Reader:
                 f = h5py.File(file, 'r')
                 file = os.path.splitext(file)[0]
                 file = os.path.basename(file)
-                _, field = file.strsplit('_')
+                _, field_no = file.split('_')
+                field_no = int(field_no)
 
-                field = f["sample/0/plate/%s/experiment/%s/position/%s/image/channel" % (plate, well, field)][:]
-                info = f["definition/feature/%s" % channel] + metadata[well]
+                field = f["sample/0/plate/%s/experiment/%s/position/%s/image/channel" % (os.path.basename(plate), well, field_no)][:]
+                info = dict(f["definition/feature/%s" % channel])
+                info['well'] = well
+                info['field_no'] = field_no
 
-                yield field, info
+                yield np.squeeze(field), info
 
     @staticmethod
     def get_crops(plate, metadata, padding, channel='primary__primary4', shuffle=False):
 
         for field, info in HDF5Reader.get_fields(plate, metadata, channel, shuffle):
-            height, width, _ = field.shape
+            _, height, width = field.shape
             centers = info['center'][()]
             if shuffle:
                 np.random.shuffle(centers)
-                
+
             for center_x, center_y in centers:
                 center_y = np.clip(center_y, padding, height - padding)
                 center_x = np.clip(center_x, padding, width - padding)

@@ -62,7 +62,7 @@ class Boyd2019(MultiCellDataset):
                                                RandomRot90()])):
 
         padding = 32
-        metadata = self.read_metadata(path_metadata)
+        self.metadata = self.read_metadata(path_metadata)
 
         self.avg_mda231 = None
         self.std_mda231 = None
@@ -72,10 +72,8 @@ class Boyd2019(MultiCellDataset):
         # wrap iterators in partial to get a fresh call
         self.mda231 = partial(HDF5Reader.get_crops,
                               '22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231',
-                              metadata, padding, shuffle=True)
-        self.mda468 = partial(HDF5Reader.get_crops,
-                              '22_384_20X-hNA_D_F_C3_C5_20160032_2016.01.25.16.27.22_MDA468',
-                              metadata, padding, shuffle=True)
+                              self.metadata, padding, shuffle=True)
+        self.mda468 = list(HDF5Reader.get_crops('22_384_20X-hNA_D_F_C3_C5_20160032_2016.01.25.16.27.22_MDA468', self.metadata, padding, shuffle=True))
 
         if not self.avg_mda231 or not self.std_mda231:
             self.avg_mda231, self.std_mda231 = self.get_normalization_params(list(self.mda231()))
@@ -83,7 +81,7 @@ class Boyd2019(MultiCellDataset):
         if not self.avg_mda468 or not self.std_mda468:
             self.avg_mda468, self.std_mda468 = self.get_normalization_params(list(self.mda468()))
 
-        super().__init__(self.mda231, self.mda468, metadata, transform)
+        super().__init__(self.mda231, self.mda468, self.metadata, transform)
 
     @staticmethod
     def read_metadata(metadata_path):
