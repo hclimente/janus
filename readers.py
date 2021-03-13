@@ -31,8 +31,10 @@ class HDF5Reader:
                 _, field_no = file.split('_')
                 field_no = int(field_no)
 
-                field = f["sample/0/plate/%s/experiment/%s/position/%s/image/channel" % (os.path.basename(plate), well, field_no)][:]
-                info = dict(f["definition/feature/%s" % channel])
+                base_path = "sample/0/plate/%s/experiment/%s/position/%s" % (os.path.basename(plate), well, field_no)
+
+                field = f["%s/image/channel" % (base_path)][:]
+                info = dict(f['%s/feature/%s' % (base_path, channel)])
                 info['well'] = well
                 info['field_no'] = field_no
 
