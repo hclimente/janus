@@ -70,16 +70,19 @@ class Boyd2019(MultiCellDataset):
         self.std_mda468 = None
 
         # wrap iterators in partial to get a fresh call
-        self.mda231 = partial(HDF5Reader.get_crops,
-                              '22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231',
-                              self.metadata, padding, shuffle=True)
-        self.mda468 = list(HDF5Reader.get_crops('22_384_20X-hNA_D_F_C3_C5_20160032_2016.01.25.16.27.22_MDA468', self.metadata, padding, shuffle=True))
+        mda231_crops = HDF5Reader.get_crops('test/data/22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231',
+                                            self.metadata, padding, shuffle=True)
+        self.mda231 = torch.stack([x for x, _ in mda231_crops])
+
+        mda468_crops = HDF5Reader.get_crops('test/data/22_384_20X-hNA_D_F_C3_C5_20160032_2016.01.25.16.27.22_MDA468',
+                                            self.metadata, padding, shuffle=True)
+        self.mda468 = torch.stack([x for x, _ in mda468_crops])
 
         if not self.avg_mda231 or not self.std_mda231:
-            self.avg_mda231, self.std_mda231 = self.get_normalization_params(list(self.mda231()))
+            self.avg_mda231, self.std_mda231 = self.get_normalization_params(self.mda231)
 
         if not self.avg_mda468 or not self.std_mda468:
-            self.avg_mda468, self.std_mda468 = self.get_normalization_params(list(self.mda468()))
+            self.avg_mda468, self.std_mda468 = self.get_normalization_params(self.mda468)
 
         super().__init__(self.mda231, self.mda468, self.metadata, transform)
 
