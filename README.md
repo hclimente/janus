@@ -1,4 +1,5 @@
-[![Build](https://github.com/hclimente/janus/actions/workflows/python-app.yml/badge.svg)](https://github.com/hclimente/janus/actions/workflows/python-app.yml)
+[![Python application](https://github.com/hclimente/janus/actions/workflows/python-app.yml/badge.svg)](https://github.com/hclimente/janus/actions/workflows/python-app.yml)
+[![codecov](https://codecov.io/gh/hclimente/janus/branch/main/graph/badge.svg?token=bR2lcV4mBp)](https://codecov.io/gh/hclimente/janus)
 
 # janus
 
