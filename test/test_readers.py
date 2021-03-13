@@ -8,7 +8,7 @@ def test_get_fields():
 
     metadata = pd.DataFrame({'well': ['A01', 'B02']})
 
-    fields = HDF5Reader.get_fields('data/22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231', metadata)
+    fields = HDF5Reader.get_fields('test/data/22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231', metadata)
 
     for field, info in fields:
         assert len(info) == 7
@@ -26,7 +26,8 @@ def test_get_crops():
     metadata = pd.DataFrame({'well': ['A01', 'B02']})
     padding = 32
 
-    crops = HDF5Reader.get_crops('data/22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231', metadata, padding)
+    crops = HDF5Reader.get_crops('test/data/22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231',
+                                 metadata, padding)
 
     for crop, info in crops:
         assert len(info) == 7

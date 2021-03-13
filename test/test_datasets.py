@@ -8,7 +8,7 @@ from readers import HDF5Reader
 
 def test_read_metadata():
 
-    df = Boyd2019.read_metadata('../data/boyd_2019_PlateMap-KPP_MOA.xlsx')
+    df = Boyd2019.read_metadata('data/boyd_2019_PlateMap-KPP_MOA.xlsx')
 
     assert df.shape == (384, 9)
 
@@ -34,7 +34,8 @@ def test_get_normalization_params():
     metadata = pd.DataFrame({'well': ['A01', 'B02']})
     padding = 32
 
-    crops = HDF5Reader.get_crops('data/22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231', metadata, padding)
+    crops = HDF5Reader.get_crops('test/data/22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231', metadata,
+                                 padding)
     crops = torch.stack([x for x, _ in crops])
 
     mean, std = Boyd2019.get_normalization_params(crops)
