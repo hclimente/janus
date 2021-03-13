@@ -1,3 +1,5 @@
+[![Python application](https://github.com/hclimente/janus/actions/workflows/python-app.yml/badge.svg)](https://github.com/hclimente/janus/actions/workflows/python-app.yml)
+
 # janus
 
 ## Environment
