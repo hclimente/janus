@@ -1,8 +1,11 @@
+codecov
 h5py
 numpy
 openpyxl
 pandas
+pytest-cov
+seaborn
+sklearn
 torch
 torchvision
-pytest-cov
-codecov
+umap
