@@ -95,6 +95,8 @@ class Boyd2019(MultiCellDataset):
     @staticmethod
     def get_normalization_params(imgs):
 
+        imgs = torch.Tensor.float(imgs)
+
         avg = torch.mean(imgs, dim=0)
         std = torch.std(imgs, dim=0)
 

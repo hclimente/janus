@@ -3,6 +3,7 @@ import os
 
 import h5py
 import numpy as np
+import torch
 
 
 class HDF5Reader:
@@ -38,7 +39,7 @@ class HDF5Reader:
                 info['well'] = well
                 info['field_no'] = field_no
 
-                yield np.squeeze(field), info
+                yield torch.tensor(np.squeeze(field)), info
 
     @staticmethod
     def get_crops(plate, metadata, padding, channel='primary__primary4', shuffle=False):
@@ -58,4 +59,4 @@ class HDF5Reader:
                 top = center_y - padding
                 bottom = center_y + padding
 
-                yield field[top:bottom, left:right, :], info
+                yield field[:, top:bottom, left:right], info
