@@ -4,3 +4,5 @@ openpyxl
 pandas
 torch
 torchvision
+pytest-cov
+codecov
