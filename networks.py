@@ -16,10 +16,8 @@ class SiameseNet(nn.Module):
                                      nn.PReLU(),
                                      nn.MaxPool2d(2, stride=2))
 
-        self.fc = nn.Sequential(nn.Dropout(0.5),
-                                nn.Linear(64 * 8 * 8, 256),
+        self.fc = nn.Sequential(nn.Linear(64 * 8 * 8, 256),
                                 nn.PReLU(),
-                                nn.Dropout(0.1),
                                 nn.Linear(256, 256))
 
     def forward(self, x1, x2):
