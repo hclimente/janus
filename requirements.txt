@@ -1,0 +1,11 @@
+codecov
+h5py
+numpy
+openpyxl
+pandas
+pytest-cov
+seaborn
+sklearn
+torch
+torchvision
+umap-learn
