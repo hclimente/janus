@@ -31,15 +31,13 @@ def test_read_metadata():
 def test_get_normalization_params():
     # basic functionality
     row = torch.linspace(0, 4, 5)
-    channel = torch.vstack([row, row, row, row, row])
-    img = torch.stack([channel, channel, channel])
-    imgs = torch.stack([img, img, img, img])
+    imgs = row.repeat(4, 3, 5, 1)
 
     mean, std = Boyd2019.get_normalization_params(imgs)
 
     assert type(mean) is torch.Tensor
     assert mean.shape == (3, 5, 5)
-    assert torch.all(mean == channel)
+    assert torch.all(mean == row.repeat(5,1))
 
     assert type(std) is torch.Tensor
     assert std.shape == (3, 5, 5)
