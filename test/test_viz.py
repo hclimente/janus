@@ -1,6 +1,7 @@
 import numpy as np
+import torch
 
-from viz import tsne, umap
+from viz import tsne, umap, plot_cell
 
 
 def test_tsne():
@@ -17,3 +18,9 @@ def test_umap():
     y = np.random.randint(0, 3, 40)
 
     umap(x, y)
+
+def test_plot_cell():
+
+    crop = torch.linspace(0, 4, 5).repeat(3, 5, 1)
+
+    plot_cell(crop)

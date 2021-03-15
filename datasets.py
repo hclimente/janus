@@ -23,7 +23,7 @@ class MultiCellDataset (Dataset):
     def __getitem__(self, index):
         random.seed(index)
 
-        # give all moas the same chance
+        # give all moas the same weight
         moa1 = random.choice(self.metadata['moa'].unique())
         cell1, moa1 = self.sample_crops(moa1, True, self.dataset_1)
 
@@ -38,16 +38,14 @@ class MultiCellDataset (Dataset):
 
     def __len__(self):
         # artificially limit epoch length
-        return 100000
+        return 10000
 
     @staticmethod
     def sample_crops(prev_moa, same_moa, dataset):
         while True:
             crop, info = random.choice(dataset)
 
-            if same_moa and prev_moa == info['moa']:
-                break
-            elif not same_moa and prev_moa != info['moa']:
+            if same_moa == (prev_moa == info['moa']):
                 break
 
         return crop, info['moa']
@@ -55,26 +53,15 @@ class MultiCellDataset (Dataset):
 
 class Boyd2019(MultiCellDataset):
 
-    def __init__(self, data_path, metadata,
+    def __init__(self, data_path, metadata, padding = 32, force_calc_params = True,
                  transform=transforms.Compose([transforms.RandomHorizontalFlip(),
                                                transforms.RandomVerticalFlip(),
                                                RandomRot90()])):
 
-        padding = 32
-
-        mda231_crops = HDF5Reader.get_crops(join(data_path,
-                                                 '22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231'),
-                                            metadata, padding)
-        mda231 = [x for x in mda231_crops]
-        self.avg_mda231, self.std_mda231 = self.load_parameters(join(data_path, 'mda231_params.pkl'),
-                                                                torch.stack([x[0] for x in mda231]))
-
-        mda468_crops = HDF5Reader.get_crops(join(data_path,
-                                                 '22_384_20X-hNA_D_F_C3_C5_20160032_2016.01.25.16.27.22_MDA468'),
-                                            metadata, padding)
-        mda468 = [x for x in mda468_crops]
-        self.avg_mda468, self.std_mda468 = self.load_parameters(join(data_path, 'mda468_params.pkl'),
-                                                                torch.stack([x[0] for x in mda468]))
+        mda231 = self.load_crops(join(data_path, '22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231'),
+                                 metadata, padding, force_calc_params)
+        mda468 = self.load_crops(join(data_path, '22_384_20X-hNA_D_F_C3_C5_20160032_2016.01.25.16.27.22_MDA468'),
+                                 metadata, padding, force_calc_params)
 
         super().__init__(mda231, mda468, metadata, transform)
 
@@ -82,8 +69,11 @@ class Boyd2019(MultiCellDataset):
     def read_metadata(metadata_path):
         metadata = pd.read_excel(metadata_path, engine='openpyxl')
 
-        # Remove empty wells
+        # remove empty wells
         metadata = metadata[~metadata.content.isnull()]
+
+        # remove wells with no drug/dmso
+        metadata = metadata[metadata['content'] != 'None']
 
         return metadata
 
@@ -102,10 +92,24 @@ class Boyd2019(MultiCellDataset):
 
         try:
             with open(pickle_path, 'rb') as parameters:
+                print('loading normalization parameters')
                 avg, std = pickle.load(parameters)
         except IOError:
+            print('computing normalization parameters')
             with open(pickle_path, 'wb') as parameters:
                 avg, std = Boyd2019.get_normalization_params(crops)
                 pickle.dump((avg, std), parameters)
 
         return avg, std
+
+    @staticmethod
+    def load_crops(crops_path, metadata, padding, normalize=True):
+
+        crops = HDF5Reader.get_crops(crops_path, metadata, padding)
+        crops = [x for x in crops]
+        if normalize:
+            avg, std = Boyd2019.load_parameters(join(crops_path, 'norm_params.pkl'),
+                                                torch.stack([x[0] for x in crops]))
+            crops = [((x[0] - avg)/std, x[1]) for x in crops]
+
+        return crops

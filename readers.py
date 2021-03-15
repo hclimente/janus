@@ -34,6 +34,7 @@ class HDF5Reader:
                 info = dict(f['%s/feature/%s' % (base_path, channel)])
                 info['well'] = well
                 info['field_no'] = field_no
+                info['moa'] = metadata.moa.values[metadata.well == well][0]
 
                 yield torch.tensor(np.squeeze(field)), info
 
