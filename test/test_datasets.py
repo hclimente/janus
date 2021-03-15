@@ -2,26 +2,36 @@ import os
 import pandas as pd
 import torch
 
-from datasets import Boyd2019
+from datasets import Boyd2019, MultiCellDataset
 from readers import HDF5Reader
+
+
+def clean_pickles():
+
+    for f in ['test/data/mda231_params.pkl',
+              'test/data/mda468_params.pkl',
+              'test/params.pkl']:
+        if os.path.isfile(f):
+            os.remove(f)
 
 
 def test_boyd2019():
 
-    assert not os.path.isfile('test/data/mda231_params.pkl')
-    assert not os.path.isfile('test/data/mda468_params.pkl')
+    clean_pickles()
 
     metadata = pd.DataFrame({'well': ['A01', 'B02']})
     d = Boyd2019('test/data', metadata)
 
-    assert torch.all(d.mda231 == d.dataset_1)
-    assert d.mda231.shape == (891, 3, 64, 64)
+    assert len(d.dataset_1) == 891
+    assert all([x[0].shape == (3, 64, 64) for x in d.dataset_1])
+    assert all([type(x[1]) is dict for x in d.dataset_1])
     assert d.avg_mda231.shape == (3, 64, 64)
     assert d.std_mda231.shape == (3, 64, 64)
     assert os.path.isfile('test/data/mda231_params.pkl')
 
-    assert torch.all(d.mda468 == d.dataset_2)
-    assert d.mda468.shape == (609, 3, 64, 64)
+    assert len(d.dataset_2) == 609
+    assert all([x[0].shape == (3, 64, 64) for x in d.dataset_2])
+    assert all([type(x[1]) is dict for x in d.dataset_2])
     assert d.avg_mda468.shape == (3, 64, 64)
     assert d.std_mda468.shape == (3, 64, 64)
     assert os.path.isfile('test/data/mda468_params.pkl')
@@ -33,8 +43,7 @@ def test_boyd2019():
     assert torch.all(new.avg_mda468 == d.avg_mda468)
     assert torch.all(new.std_mda468 == d.std_mda468)
 
-    os.remove('test/data/mda231_params.pkl')
-    os.remove('test/data/mda468_params.pkl')
+    clean_pickles()
 
 
 def test_read_metadata():
@@ -78,7 +87,7 @@ def test_get_normalization_params():
 
 def test_load_parameters():
 
-    assert not os.path.isfile('test/params.pkl')
+    clean_pickles()
 
     row = torch.linspace(0, 4, 5)
     crops = row.repeat(4, 3, 5, 1)
@@ -98,4 +107,57 @@ def test_load_parameters():
     assert torch.all(avg == new_avg)
     assert torch.all(std == new_std)
 
-    os.remove('test/params.pkl')
+    clean_pickles()
+
+
+def test_multicelldataset():
+
+    p = MultiCellDataset(None, None, None, None)
+
+    assert len(p) == 100000
+
+
+def test_sample_crops():
+
+    dataset = [('moa1', {'moa': 1}),
+               ('moa2', {'moa': 2}),
+               ('moa3', {'moa': 3}),
+               ('moa4', {'moa': 4}),
+               ('moa5', {'moa': 5})]
+
+    for i in range(10):
+        _, moa = MultiCellDataset.sample_crops(1, True, dataset)
+        assert moa == 1
+
+    for i in range(10):
+        _, moa = MultiCellDataset.sample_crops(1, False, dataset)
+        assert moa != 1
+
+
+def test_next():
+
+    dataset_1 = [('A1', {'moa': 1}),
+                 ('A2', {'moa': 2}),
+                 ('A3', {'moa': 3}),
+                 ('A4', {'moa': 4}),
+                 ('A5', {'moa': 5})]
+    dataset_2 = [('B1', {'moa': 1}),
+                 ('B2', {'moa': 2}),
+                 ('B3', {'moa': 3}),
+                 ('B4', {'moa': 4}),
+                 ('B5', {'moa': 5})]
+    metadata = pd.DataFrame({'moa': [x for x in range(1, 6)]})
+
+    p = MultiCellDataset(dataset_1, dataset_2, metadata, None)
+
+    # test seed
+    assert p[1] == p[1]
+    assert p[1] != p[2]
+
+    for i in range(20):
+        cell1, moa1, cell2, moa2, same_moa = p[2]
+        assert cell1 in [x[0] for x in dataset_1]
+        assert moa1 == [x[1]['moa'] for x in dataset_1 if x[0] == cell1][0]
+        assert cell2 in [x[0] for x in dataset_2]
+        assert moa2 == [x[1]['moa'] for x in dataset_2 if x[0] == cell2][0]
+        assert same_moa == (moa1 == moa2)

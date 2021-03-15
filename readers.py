@@ -12,17 +12,13 @@ class HDF5Reader:
         pass
 
     @staticmethod
-    def get_fields(plate, metadata, channel='primary__primary4', shuffle=False):
+    def get_fields(plate, metadata, channel='primary__primary4'):
 
         wells = metadata['well'].to_list()
-        if shuffle:
-            np.random.shuffle(wells)
 
         for well in wells:
 
             files = glob.glob("%s/hdf5/%s_*.ch5" % (plate, well))
-            if shuffle:
-                np.random.shuffle(files)
 
             for file in files:
 
@@ -42,13 +38,11 @@ class HDF5Reader:
                 yield torch.tensor(np.squeeze(field)), info
 
     @staticmethod
-    def get_crops(plate, metadata, padding, channel='primary__primary4', shuffle=False):
+    def get_crops(plate, metadata, padding, channel='primary__primary4'):
 
-        for field, info in HDF5Reader.get_fields(plate, metadata, channel, shuffle):
+        for field, info in HDF5Reader.get_fields(plate, metadata, channel):
             _, height, width = field.shape
             centers = info['center'][()]
-            if shuffle:
-                np.random.shuffle(centers)
 
             for center_x, center_y in centers:
                 center_y = np.clip(center_y, padding, height - padding)

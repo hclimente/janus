@@ -1,4 +1,3 @@
-from functools import partial
 import random
 
 from os.path import join
@@ -21,14 +20,12 @@ class MultiCellDataset (Dataset):
         self.metadata = metadata
         self.transform = transform
 
-    def __getitem__(self, index, balanced=True):
+    def __getitem__(self, index):
         random.seed(index)
 
-        if balanced:
-            moa1 = random.choice(self.metadata['moa'].unique)
-            cell1, moa1 = self.sample_crops(moa1, True, self.dataset_1)
-        else:
-            cell1, moa1 = next(self.dataset_1())
+        # give all moas the same chance
+        moa1 = random.choice(self.metadata['moa'].unique())
+        cell1, moa1 = self.sample_crops(moa1, True, self.dataset_1)
 
         same_moa = random.getrandbits(1)
         cell2, moa2 = self.sample_crops(moa1, same_moa, self.dataset_2)
@@ -46,7 +43,7 @@ class MultiCellDataset (Dataset):
     @staticmethod
     def sample_crops(prev_moa, same_moa, dataset):
         while True:
-            crop, info = next(dataset())
+            crop, info = random.choice(dataset)
 
             if same_moa and prev_moa == info['moa']:
                 break
@@ -65,27 +62,27 @@ class Boyd2019(MultiCellDataset):
 
         padding = 32
 
-        # wrap iterators in partial to get a fresh call
         mda231_crops = HDF5Reader.get_crops(join(data_path,
                                                  '22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231'),
                                             metadata, padding)
-        self.mda231 = torch.stack([x for x, _ in mda231_crops])
+        mda231 = [x for x in mda231_crops]
+        self.avg_mda231, self.std_mda231 = self.load_parameters(join(data_path, 'mda231_params.pkl'),
+                                                                torch.stack([x[0] for x in mda231]))
 
         mda468_crops = HDF5Reader.get_crops(join(data_path,
                                                  '22_384_20X-hNA_D_F_C3_C5_20160032_2016.01.25.16.27.22_MDA468'),
                                             metadata, padding)
-        self.mda468 = torch.stack([x for x, _ in mda468_crops])
+        mda468 = [x for x in mda468_crops]
+        self.avg_mda468, self.std_mda468 = self.load_parameters(join(data_path, 'mda468_params.pkl'),
+                                                                torch.stack([x[0] for x in mda468]))
 
-        self.avg_mda231, self.std_mda231 = self.load_parameters(join(data_path, 'mda231_params.pkl'), self.mda231)
-        self.avg_mda468, self.std_mda468 = self.load_parameters(join(data_path, 'mda468_params.pkl'), self.mda468)
-
-        super().__init__(self.mda231, self.mda468, metadata, transform)
+        super().__init__(mda231, mda468, metadata, transform)
 
     @staticmethod
     def read_metadata(metadata_path):
         metadata = pd.read_excel(metadata_path, engine='openpyxl')
 
-        # Remove wells without content
+        # Remove empty wells
         metadata = metadata[~metadata.content.isnull()]
 
         return metadata
