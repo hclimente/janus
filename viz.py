@@ -25,7 +25,7 @@ def __plot(x, y, algo):
 
 
 def plot_cell(crop):
-    crop = torch.moveaxis(crop, 0, 2)
+    crop = crop.permute((1, 2, 0))
 
     fig, axes = plt.subplots(figsize=(5, 5), ncols=2, nrows=2)
 

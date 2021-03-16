@@ -22,21 +22,21 @@ class HDF5Reader:
 
             for file in files:
 
-                f = h5py.File(file, 'r')
-                file = os.path.splitext(file)[0]
-                file = os.path.basename(file)
-                _, field_no = file.split('_')
-                field_no = int(field_no)
+                with h5py.File(file, 'r') as f:
+                    file = os.path.splitext(file)[0]
+                    file = os.path.basename(file)
+                    _, field_no = file.split('_')
+                    field_no = int(field_no)
 
-                base_path = "sample/0/plate/%s/experiment/%s/position/%s" % (os.path.basename(plate), well, field_no)
+                    base_path = "sample/0/plate/%s/experiment/%s/position/%s" % (os.path.basename(plate), well, field_no)
 
-                field = f["%s/image/channel" % (base_path)][:]
-                info = dict(f['%s/feature/%s' % (base_path, channel)])
-                info['well'] = well
-                info['field_no'] = field_no
-                info['moa'] = metadata.moa.values[metadata.well == well][0]
+                    field = f["%s/image/channel" % (base_path)][:]
+                    info = dict(f['%s/feature/%s' % (base_path, channel)])
+                    info['well'] = well
+                    info['field_no'] = field_no
+                    info['moa'] = metadata.moa.values[metadata.well == well][0]
 
-                yield torch.tensor(np.squeeze(field)), info
+                    yield torch.tensor(np.squeeze(field)), info
 
     @staticmethod
     def get_crops(plate, metadata, padding, channel='primary__primary4'):

@@ -156,10 +156,6 @@ def test_next():
 
     p = MultiCellDataset(dataset_1, dataset_2, metadata, None)
 
-    # test seed
-    assert p[1] == p[1]
-    assert p[1] != p[2]
-
     for i in range(20):
         cell1, moa1, cell2, moa2, same_moa = p[i]
         assert cell1 in [x[0] for x in dataset_1]
