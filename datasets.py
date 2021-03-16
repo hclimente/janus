@@ -44,20 +44,15 @@ class MultiCellDataset(Dataset):
     @staticmethod
     def sample_crops(prev_moa, same_moa, dataset):
 
-        selection = MultiCellDataset.get_same_moa(tuple([x['moa'] for _, x in dataset]), prev_moa)
-
-        if not same_moa:
-            selection = ~selection
-
-        list_idx = np.where(selection)[0]
-        idx = np.random.choice(list_idx)
+        moas = tuple([x['moa'] for _, x in dataset])
+        idx = np.random.choice(MultiCellDataset.moa_match(moas, prev_moa, same_moa))
 
         return dataset[idx][0], dataset[idx][1]['moa']
 
     @staticmethod
     @lru_cache(maxsize=None)
-    def get_same_moa(moas, moa):
-        return np.array([m == moa for m in moas])
+    def moa_match(moas, moa, same_moa):
+        return np.where([same_moa == (m == moa) for m in moas])[0]
 
 
 class Boyd2019(MultiCellDataset):
