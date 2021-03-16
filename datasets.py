@@ -1,6 +1,7 @@
+from os.path import join
 import random
 
-from os.path import join
+import numpy as np
 import pandas as pd
 import pickle
 from torchvision import transforms
@@ -41,13 +42,15 @@ class MultiCellDataset (Dataset):
 
     @staticmethod
     def sample_crops(prev_moa, same_moa, dataset):
-        while True:
-            crop, info = random.choice(dataset)
+        selection = np.array([x['moa'] == prev_moa for _, x in dataset])
 
-            if same_moa == (prev_moa == info['moa']):
-                break
+        if not same_moa:
+            selection = ~selection
 
-        return crop, info['moa']
+        list_idx = np.where(selection)[0]
+        idx = np.random.choice(list_idx)
+
+        return dataset[idx][0], dataset[idx][1]['moa']
 
 
 class Boyd2019(MultiCellDataset):
