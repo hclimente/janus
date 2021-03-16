@@ -21,7 +21,6 @@ class MultiCellDataset (Dataset):
         self.transform = transform
 
     def __getitem__(self, index):
-        random.seed(index)
 
         # give all moas the same weight
         moa1 = random.choice(self.metadata['moa'].unique())
