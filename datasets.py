@@ -12,7 +12,7 @@ from readers import HDF5Reader
 from transforms import RandomRot90
 
 
-class MultiCellDataset (Dataset):
+class MultiCellDataset(Dataset):
 
     def __init__(self, dataset_1, dataset_2, metadata, transform):
 
