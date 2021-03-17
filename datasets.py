@@ -57,7 +57,7 @@ class MultiCellDataset(Dataset):
 
 class Boyd2019(MultiCellDataset):
 
-    def __init__(self, data_path, metadata, padding = 32, force_calc_params = True,
+    def __init__(self, data_path, metadata, padding=32, force_calc_params=True,
                  transform=transforms.Compose([transforms.RandomHorizontalFlip(),
                                                transforms.RandomVerticalFlip(),
                                                RandomRot90()])):
@@ -109,8 +109,8 @@ class Boyd2019(MultiCellDataset):
     @staticmethod
     def load_crops(crops_path, metadata, padding, normalize=True):
 
-        crops = HDF5Reader.get_crops(crops_path, metadata, padding)
-        crops = [x for x in crops]
+        crops = list(HDF5Reader.get_crops(crops_path, metadata, padding))
+
         if normalize:
             avg, std = Boyd2019.load_parameters(join(crops_path, 'norm_params.pkl'),
                                                 torch.stack([x[0] for x in crops]))

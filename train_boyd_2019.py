@@ -22,11 +22,11 @@ metadata = Boyd2019.read_metadata(metadata_file)
 
 # filter by 2 moas and make train test
 metadata = metadata.loc[metadata.moa.isin(['Neutral', 'PKC Inhibitor'])]
-train_metadata = metadata.sample(frac = .7)
+train_metadata = metadata.sample(frac=0.7)
 test_metadata = metadata.drop(train_metadata.index)
 
 
-boyd2019 = Boyd2019('data/boyd_2019/', train_metadata)
+boyd2019 = Boyd2019(data_path, train_metadata)
 
 # training params
 train_batch_size = 64
@@ -42,7 +42,7 @@ train_dataloader = DataLoader(boyd2019,
                               batch_size=train_batch_size)
 
 # get test set: different wells than training
-test_boyd2019 = Boyd2019('data/boyd_2019/', test_metadata)
+test_boyd2019 = Boyd2019(data_path, test_metadata)
 
 test_dataloader = DataLoader(test_boyd2019,
                              shuffle=True,
@@ -51,12 +51,12 @@ test_dataloader = DataLoader(test_boyd2019,
 
 net = SiameseNet().to(device)
 criterion = ContrastiveLoss()
-optimizer = torch.optim.Adam(net.parameters(), lr = 0.0005)
+optimizer = torch.optim.Adam(net.parameters(), lr=0.0005)
     
 with trange(train_number_epochs) as epochs:
     for epoch in epochs:
         test_data = iter(test_dataloader)
-        with tqdm(train_dataloader, total = int(len(boyd2019)/train_batch_size)) as tepoch:
+        with tqdm(train_dataloader, total=int(len(boyd2019)/train_batch_size)) as tepoch:
             for data in tepoch:
                 img0, moa0, img1, moa1, label = data
                 img0, img1, label = img0.to(device), img1.to(device), label.to(device)
@@ -75,4 +75,3 @@ with trange(train_number_epochs) as epochs:
                 tepoch.set_postfix(tr_loss=loss.item(), te_loss=loss_test.item())
 
         torch.save(net.state_dict(), 'siamese_%04d.torch' % epoch)
-
