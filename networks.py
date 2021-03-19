@@ -7,12 +7,15 @@ class SiameseNet(nn.Module):
         super(SiameseNet, self).__init__()
 
         self.convnet = nn.Sequential(nn.Conv2d(3, 32, 3, padding=1),
+                                     nn.BatchNorm2d(32),
                                      nn.PReLU(),
                                      nn.MaxPool2d(2, stride=2),
                                      nn.Conv2d(32, 64, 3, padding=1),
+                                     nn.BatchNorm2d(64),
                                      nn.PReLU(),
                                      nn.MaxPool2d(2, stride=2),
                                      nn.Conv2d(64, 64, 3, padding=1),
+                                     nn.BatchNorm2d(64),
                                      nn.PReLU(),
                                      nn.MaxPool2d(2, stride=2))
 
