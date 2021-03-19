@@ -3,7 +3,7 @@ import torch.nn as nn
 
 class SiameseNet(nn.Module):
 
-    def __init__(self):
+    def __init__(self, p_dropout):
         super(SiameseNet, self).__init__()
 
         self.convnet = nn.Sequential(nn.Conv2d(3, 32, 3, padding=1),
@@ -16,7 +16,8 @@ class SiameseNet(nn.Module):
                                      nn.PReLU(),
                                      nn.MaxPool2d(2, stride=2))
 
-        self.fc = nn.Sequential(nn.Linear(64 * 8 * 8, 256),
+        self.fc = nn.Sequential(nn.Dropout(p_dropout),
+                                nn.Linear(64 * 8 * 8, 256),
                                 nn.PReLU(),
                                 nn.Linear(256, 256))
 
