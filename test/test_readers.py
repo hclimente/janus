@@ -12,7 +12,7 @@ def test_get_fields():
     fields = HDF5Reader.get_fields('test/data/22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231', metadata)
 
     for field, info in fields:
-        assert len(info) == 8
+        assert len(info) == 4
         assert info['well'] in metadata.well.to_list()
         assert info['field_no'] in [1, 2, 3, 4]
         assert info['moa'] in ['dmso', 'tp53']
@@ -33,7 +33,7 @@ def test_get_crops():
                                  metadata, padding)
 
     for crop, info in crops:
-        assert len(info) == 8
+        assert len(info) == 4
         assert info['well'] in metadata.well.to_list()
         assert info['field_no'] in [1, 2, 3, 4]
         assert info['moa'] in ['dmso', 'tp53']
