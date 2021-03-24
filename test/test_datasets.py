@@ -15,13 +15,16 @@ def clean_pickles():
             os.remove(f)
 
 
-def test_boyd2019():
+def test_boyd2019(capfd):
 
     clean_pickles()
 
     metadata = pd.DataFrame({'well': ['A01', 'B02'],
                              'moa': ['dmso', 'tp53']})
     d = Boyd2019('test/data', metadata)
+    out, _ = capfd.readouterr()
+
+    assert out == 'computing normalization parameters\ncomputing normalization parameters\n'
 
     assert len(d.dataset_1) == 891
     assert all([x[0].shape == (3, 64, 64) for x in d.dataset_1])
@@ -90,15 +93,18 @@ def test_get_normalization_params():
     assert torch.all(std == 0)
 
 
-def test_load_parameters():
+def test_load_parameters(capfd):
 
     clean_pickles()
 
     row = torch.linspace(0, 4, 5)
     crops = row.repeat(4, 3, 5, 1)
-    avg, std = Boyd2019.load_parameters('test/params.pkl', crops)
+    avg, std = Boyd2019.load_parameters('test/params.pkl', crops, False)
+    out, _ = capfd.readouterr()
 
     assert os.path.isfile('test/params.pkl')
+    assert out == 'computing normalization parameters\n'
+
     assert type(avg) is torch.Tensor
     assert avg.shape == (3, 5, 5)
     assert torch.all(avg == row.repeat(5,1))
@@ -107,13 +113,21 @@ def test_load_parameters():
     assert std.shape == (3, 5, 5)
     assert torch.all(std == 0)
 
-    new_avg, new_std = Boyd2019.load_parameters('test/params.pkl', None)
+    new_avg, new_std = Boyd2019.load_parameters('test/params.pkl', None, False)
+    out, _ = capfd.readouterr()
 
+    assert out == 'loading normalization parameters\n'
+    assert torch.all(avg == new_avg)
+    assert torch.all(std == new_std)
+
+    new_avg, new_std = Boyd2019.load_parameters('test/params.pkl', crops, True)
+    out, _ = capfd.readouterr()
+
+    assert out == 'computing normalization parameters\n'
     assert torch.all(avg == new_avg)
     assert torch.all(std == new_std)
 
     clean_pickles()
-
 
 def test_multicelldataset():
 

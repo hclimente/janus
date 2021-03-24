@@ -1,5 +1,5 @@
 from functools import lru_cache
-from os.path import join
+from os.path import isfile, join
 import random
 
 import numpy as np
@@ -57,15 +57,15 @@ class MultiCellDataset(Dataset):
 
 class Boyd2019(MultiCellDataset):
 
-    def __init__(self, data_path, metadata, padding=32, force_calc_params=True,
+    def __init__(self, data_path, metadata, padding=32, recompute_params=True,
                  transform=transforms.Compose([transforms.RandomHorizontalFlip(),
                                                transforms.RandomVerticalFlip(),
                                                RandomRot90()])):
 
         mda231 = self.load_crops(join(data_path, '22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231'),
-                                 metadata, padding, force_calc_params)
+                                 metadata, padding, recompute_params)
         mda468 = self.load_crops(join(data_path, '22_384_20X-hNA_D_F_C3_C5_20160032_2016.01.25.16.27.22_MDA468'),
-                                 metadata, padding, force_calc_params)
+                                 metadata, padding, recompute_params)
 
         super().__init__(mda231, mda468, metadata, transform)
 
@@ -92,28 +92,29 @@ class Boyd2019(MultiCellDataset):
         return avg, std
 
     @staticmethod
-    def load_parameters(pickle_path, crops):
+    def load_parameters(pickle_path, crops, recompute_params):
 
-        try:
-            with open(pickle_path, 'rb') as parameters:
-                print('loading normalization parameters')
-                avg, std = pickle.load(parameters)
-        except IOError:
+        if recompute_params or not isfile(pickle_path):
             print('computing normalization parameters')
             with open(pickle_path, 'wb') as parameters:
                 avg, std = Boyd2019.get_normalization_params(crops)
                 pickle.dump((avg, std), parameters)
+        else:
+            with open(pickle_path, 'rb') as parameters:
+                print('loading normalization parameters')
+                avg, std = pickle.load(parameters)
 
         return avg, std
 
     @staticmethod
-    def load_crops(crops_path, metadata, padding, normalize=True):
+    def load_crops(crops_path, metadata, padding, normalize=True, recompute_params=True):
 
         crops = list(HDF5Reader.get_crops(crops_path, metadata, padding))
 
         if normalize:
             avg, std = Boyd2019.load_parameters(join(crops_path, 'norm_params.pkl'),
-                                                torch.stack([x[0] for x in crops]))
+                                                torch.stack([x[0] for x in crops]),
+                                                recompute_params)
             crops = [((x[0] - avg)/std, x[1]) for x in crops]
 
         return crops

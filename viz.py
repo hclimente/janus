@@ -7,21 +7,31 @@ from umap import UMAP
 
 def tsne(x, y):
 
-    x_emb = TSNE().fit_transform(x)
-    __plot(x_emb, y, "t-SNE")
+    x_emb = get_embedding(x, 'tsne')
+    xy_plot(x_emb, y, "t-SNE")
 
 
 def umap(x, y):
 
-    x_emb = UMAP().fit_transform(x)
-    __plot(x_emb, y, "UMAP")
+    x_emb = get_embedding(x, 'umap')
+    xy_plot(x_emb, y, "UMAP")
 
 
-def __plot(x, y, algo):
+def xy_plot(x, y, emb='Dimension'):
 
     sns.set_theme()
     g = sns.relplot(x=x[:, 0], y=x[:, 1], hue=y)
-    g.set_axis_labels(algo+' 1', algo + ' 2')
+    g.set_axis_labels(emb + ' 1', emb + ' 2')
+
+
+def get_embedding(x, emb):
+
+    if emb == 'tsne':
+        x_emb = TSNE().fit_transform(x)
+    elif emb == 'umap':
+        x_emb = UMAP().fit_transform(x)
+
+    return x_emb
 
 
 def plot_cell(crop):
