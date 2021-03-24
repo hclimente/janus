@@ -31,11 +31,10 @@ class HDF5Reader:
                     base_path = 'sample/0/plate/%s/experiment/%s/position/%s' % (os.path.basename(plate), well, field_no)
 
                     field = f['%s/image/channel' % (base_path)][()]
-                    info = {}#dict(f['%s/feature/%s' % (base_path, channel)])
-                    info['center'] = f['%s/feature/%s/center' % (base_path, channel)][()]
-                    info['well'] = well
-                    info['field_no'] = field_no
-                    info['moa'] = metadata.moa.values[metadata.well == well][0]
+                    info = {'center': f['%s/feature/%s/center' % (base_path, channel)][()],
+                            'well': well,
+                            'field_no': field_no,
+                            'moa': metadata.moa.values[metadata.well == well][0]}
 
                     yield torch.tensor(np.squeeze(field)), info
 

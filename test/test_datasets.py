@@ -10,7 +10,7 @@ def clean_pickles():
 
     for f in ['test/data/22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231/norm_params.pkl',
               'test/data/22_384_20X-hNA_D_F_C3_C5_20160032_2016.01.25.16.27.22_MDA468/norm_params.pkl',
-              'test/params.pkl']:
+              'test/params.pkl', 'train_1.pkl', 'test_1.pkl']:
         if os.path.isfile(f):
             os.remove(f)
 
@@ -190,3 +190,23 @@ def test_next():
         assert any([torch.all(x[0] == cell2) for x in d.dataset_2])
         assert moa2 == [x[1]['moa'] for x in d.dataset_2 if torch.all(x[0] == cell2)][0]
         assert same_moa == (moa1 == moa2)
+
+
+def test_split_train():
+
+    dataset = [('moa1', {'moa': 1}),
+               ('moa2', {'moa': 2}),
+               ('moa3', {'moa': 3}),
+               ('moa4', {'moa': 4}),
+               ('moa5', {'moa': 5})]
+
+    assert dataset == MultiCellDataset.split_train(dataset, False, 1)
+    assert not os.path.isfile('train_1.pkl')
+    assert not os.path.isfile('test_1.pkl')
+
+    train = MultiCellDataset.split_train(dataset, True, 1)
+    assert len(train) == int(0.7 * len(dataset))
+    assert os.path.isfile('train_1.pkl')
+    assert os.path.isfile('test_1.pkl')
+
+    clean_pickles()
