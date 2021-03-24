@@ -72,16 +72,16 @@ class MultiCellDataset(Dataset):
 
 class Boyd2019(MultiCellDataset):
 
-    def __init__(self, data_path, metadata, padding=32, recompute_params=True,
+    def __init__(self, data_path, metadata, padding=32, scale=1.0, recompute_params=True,
                  transform=transforms.Compose([transforms.RandomHorizontalFlip(),
                                                transforms.RandomVerticalFlip(),
                                                RandomRot90()]),
                  train_test=False):
 
         mda231 = self.load_crops(join(data_path, '22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231'),
-                                 metadata, padding, recompute_params)
+                                 metadata, padding, scale, recompute_params)
         mda468 = self.load_crops(join(data_path, '22_384_20X-hNA_D_F_C3_C5_20160032_2016.01.25.16.27.22_MDA468'),
-                                 metadata, padding, recompute_params)
+                                 metadata, padding, scale, recompute_params)
 
         super().__init__(mda231, mda468, metadata, transform, train_test)
 
@@ -123,9 +123,9 @@ class Boyd2019(MultiCellDataset):
         return avg, std
 
     @staticmethod
-    def load_crops(crops_path, metadata, padding, normalize=True, recompute_params=True):
+    def load_crops(crops_path, metadata, padding, scale=1.0, normalize=True, recompute_params=True):
 
-        crops = list(HDF5Reader.get_crops(crops_path, metadata, padding))
+        crops = list(HDF5Reader.get_crops(crops_path, metadata, padding, scale))
 
         if normalize:
             avg, std = Boyd2019.load_parameters(join(crops_path, 'norm_params.pkl'),

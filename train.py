@@ -33,7 +33,7 @@ np.random.seed(args['seed'])
 
 if args['split'] == 'crop':
 
-    tr_data = Boyd2019(args['data'], metadata, train_test=True)
+    tr_data = Boyd2019(args['data'], metadata, scale=1.0, train_test=True)
 
     te_1 = torch.load('test_1.pkl')
     te_2 = torch.load('test_2.pkl')
