@@ -1,7 +1,8 @@
+from functools import lru_cache
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.manifold import TSNE
-import torch
 from umap import UMAP
 
 
@@ -25,6 +26,12 @@ def xy_plot(x, y, emb='Dimension'):
 
 
 def get_embedding(x, emb):
+
+    return __get_embedding(tuple(tuple(e) for e in x), emb)
+
+
+@lru_cache(maxsize=None)
+def __get_embedding(x, emb):
 
     if emb == 'tsne':
         x_emb = TSNE().fit_transform(x)
