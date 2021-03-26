@@ -55,29 +55,32 @@ def plot_cell(crop):
     axes[1][1].imshow(crop)
 
 
-def plot_tiles(imgs, embedding, nb_y=20, nb_x=20):
+def plot_tiles(imgs, emb, nb_y=20, nb_x=20):
 
     nb_imgs = imgs.shape[0]
 
+    embedding = emb.copy()
+
     # rescale axes to make things easier
-    min_y, min_x = np.min(embedding, axis=0)
-    max_y, max_x = np.max(embedding, axis=0)
+    min_x, min_y = np.min(embedding, axis=0)
+    max_x, max_y = np.max(embedding, axis=0)
 
     embedding[:, 0] = (embedding[:, 0] - min_x) / (max_x - min_x)
     embedding[:, 1] = (embedding[:, 1] - min_y) / (max_y - min_y)
-
-
+    
     min_y, min_x = np.min(embedding, axis=0)
     max_y, max_x = np.max(embedding, axis=0)
 
-    y_range = np.linspace(min_y, max_y, num=nb_y)
-    x_range = np.linspace(min_x, max_x, num=nb_x)
+    y_range = np.linspace(min_y, max_y, num=nb_y+1)
+    x_range = np.linspace(min_x, max_x, num=nb_x+1)
 
     s = 1000
     canvas = np.ones((s, s, 3))
+    
+    img_idx_dict = {}
 
-    for i in range(nb_y - 1):
-        for j in range(nb_x - 1):
+    for i in range(nb_y):
+        for j in range(nb_x):
 
             idx_x = (x_range[j] <= embedding[:, 0]) & (embedding[:, 0] < x_range[j+1])
             idx_y = (y_range[i] <= embedding[:, 1]) & (embedding[:, 1] < y_range[i+1])
@@ -86,15 +89,20 @@ def plot_tiles(imgs, embedding, nb_y=20, nb_x=20):
 
             if len(points) > 0:
 
-                img_idx = np.arange(nb_imgs)[idx_y & idx_x][0]
-                tile = imgs[img_idx].permute(1, 2, 0)
+                img_idx = np.arange(nb_imgs)[idx_y & idx_x][0]  # take first avilable img in bin
+                tile = imgs[img_idx].permute(1, 2, 0)                
 
                 h, w, c = y_range[i + 1] - y_range[i], x_range[j + 1] - x_range[j], 3
+                
+                delta_y = int(np.around(s * h))
+                delta_x = int(np.around(s * w))
 
-                resized_tile = resize(tile, output_shape=(int(s * h), int(s * w), c))
+                resized_tile = resize(tile, output_shape=(delta_y, delta_x, c))
 
                 y = int(s * y_range[i])
                 x = int(s * x_range[j])
 
-                canvas[s - y - int(s * h):s - y, x:x + int(s * w)] = resized_tile
-    return canvas
+                canvas[s - y - delta_y:s - y, x:x + delta_x] = resized_tile
+                img_idx_dict[img_idx] = (x, x + delta_x, s - y - delta_y, s - y)
+
+    return canvas, img_idx_dict
