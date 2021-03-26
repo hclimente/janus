@@ -5,6 +5,7 @@ openpyxl
 pandas
 pytest-cov
 seaborn
+skimage
 sklearn
 torch
 torchvision
