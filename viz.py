@@ -1,8 +1,12 @@
+from functools import lru_cache
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.manifold import TSNE
-import torch
 from umap import UMAP
+
+import numpy as np
+from skimage.transform import resize
 
 
 def tsne(x, y):
@@ -26,6 +30,12 @@ def xy_plot(x, y, emb='Dimension'):
 
 def get_embedding(x, emb):
 
+    return __get_embedding(tuple(tuple(e) for e in x), emb)
+
+
+@lru_cache(maxsize=None)
+def __get_embedding(x, emb):
+
     if emb == 'tsne':
         x_emb = TSNE().fit_transform(x)
     elif emb == 'umap':
@@ -43,3 +53,48 @@ def plot_cell(crop):
     axes[0][1].imshow(crop[..., 1], cmap='Greys_r')
     axes[1][0].imshow(crop[..., 2], cmap='Greys_r')
     axes[1][1].imshow(crop)
+
+
+def plot_tiles(imgs, embedding, nb_y=20, nb_x=20):
+
+    nb_imgs = imgs.shape[0]
+
+    # rescale axes to make things easier
+    min_y, min_x = np.min(embedding, axis=0)
+    max_y, max_x = np.max(embedding, axis=0)
+
+    embedding[:, 0] = (embedding[:, 0] - min_x) / (max_x - min_x)
+    embedding[:, 1] = (embedding[:, 1] - min_y) / (max_y - min_y)
+
+
+    min_y, min_x = np.min(embedding, axis=0)
+    max_y, max_x = np.max(embedding, axis=0)
+
+    y_range = np.linspace(min_y, max_y, num=nb_y)
+    x_range = np.linspace(min_x, max_x, num=nb_x)
+
+    s = 1000
+    canvas = np.ones((s, s, 3))
+
+    for i in range(nb_y - 1):
+        for j in range(nb_x - 1):
+
+            idx_x = (x_range[j] <= embedding[:, 0]) & (embedding[:, 0] < x_range[j+1])
+            idx_y = (y_range[i] <= embedding[:, 1]) & (embedding[:, 1] < y_range[i+1])
+
+            points = embedding[idx_y & idx_x]
+
+            if len(points) > 0:
+
+                img_idx = np.arange(nb_imgs)[idx_y & idx_x][0]
+                tile = imgs[img_idx].permute(1, 2, 0)
+
+                h, w, c = y_range[i + 1] - y_range[i], x_range[j + 1] - x_range[j], 3
+
+                resized_tile = resize(tile, output_shape=(int(s * h), int(s * w), c))
+
+                y = int(s * y_range[i])
+                x = int(s * x_range[j])
+
+                canvas[s - y - int(s * h):s - y, x:x + int(s * w)] = resized_tile
+    return canvas
