@@ -10,7 +10,7 @@ margin = [0.001, 0.01, 0.1, 1]
 process train {
 
     tag { "D=$D, M=$M ($I)" }
-    publishDir ".", overwrite: true, mode: "copy"
+    publishDir ".", overwrite: true
 
     input:
         each D from dropout
@@ -22,9 +22,16 @@ process train {
 
     output:
         file "sn_*.tsv"
+        file "sn_*_100.torch"
+        file 'train_*.pkl'
+        file 'test_*.pkl'
 
     """
     CUDA_VISIBLE_DEVICES=${I % 3 + 1} ./$train_script --dropout $D --margin $M --seed $I --data $train_data --metadata $train_metadata
+    mv train_1.pkl train_1_dropout_${D}_margin_${M}_seed_${I}.pkl
+    mv train_2.pkl train_2_dropout_${D}_margin_${M}_seed_${I}.pkl
+    mv test_1.pkl  test_1_dropout_${D}_margin_${M}_seed_${I}.pkl
+    mv test_2.pkl  test_2_dropout_${D}_margin_${M}_seed_${I}.pkl
     """
 }
 

@@ -2,3 +2,4 @@ data
 multi-cell-line
 src
 *.torch
+*.pkl
