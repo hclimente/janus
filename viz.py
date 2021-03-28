@@ -55,7 +55,11 @@ def plot_cell(crop):
     axes[1][1].imshow(crop)
 
 
-def plot_tiles(imgs, emb, nb_y=20, nb_x=20):
+def plot_tiles(imgs, emb, grid_units=50, pad=1):
+    
+    # roughly 1000 x 1000 canvas
+    cell_width = 1000 // grid_units
+    s = grid_units * cell_width
 
     nb_imgs = imgs.shape[0]
 
@@ -65,25 +69,18 @@ def plot_tiles(imgs, emb, nb_y=20, nb_x=20):
     min_x, min_y = np.min(embedding, axis=0)
     max_x, max_y = np.max(embedding, axis=0)
 
-    embedding[:, 0] = (embedding[:, 0] - min_x) / (max_x - min_x)
-    embedding[:, 1] = (embedding[:, 1] - min_y) / (max_y - min_y)
-    
-    min_y, min_x = np.min(embedding, axis=0)
-    max_y, max_x = np.max(embedding, axis=0)
+    embedding[:, 0] = s * (embedding[:, 0] - min_x) / (max_x - min_x)
+    embedding[:, 1] = s * (embedding[:, 1] - min_y) / (max_y - min_y)
 
-    y_range = np.linspace(min_y, max_y, num=nb_y+1)
-    x_range = np.linspace(min_x, max_x, num=nb_x+1)
-
-    s = 1000
     canvas = np.ones((s, s, 3))
     
     img_idx_dict = {}
 
-    for i in range(nb_y):
-        for j in range(nb_x):
+    for i in range(grid_units):
+        for j in range(grid_units):
 
-            idx_x = (x_range[j] <= embedding[:, 0]) & (embedding[:, 0] < x_range[j+1])
-            idx_y = (y_range[i] <= embedding[:, 1]) & (embedding[:, 1] < y_range[i+1])
+            idx_x = (j * cell_width <= embedding[:, 1]) & (embedding[:, 1] < (j + 1) * cell_width)
+            idx_y = (i * cell_width <= embedding[:, 0]) & (embedding[:, 0] < (i + 1) * cell_width)
 
             points = embedding[idx_y & idx_x]
 
@@ -92,17 +89,13 @@ def plot_tiles(imgs, emb, nb_y=20, nb_x=20):
                 img_idx = np.arange(nb_imgs)[idx_y & idx_x][0]  # take first avilable img in bin
                 tile = imgs[img_idx].permute(1, 2, 0)                
 
-                h, w, c = y_range[i + 1] - y_range[i], x_range[j + 1] - x_range[j], 3
                 
-                delta_y = int(np.around(s * h))
-                delta_x = int(np.around(s * w))
+                resized_tile = resize(tile, output_shape=(cell_width - 2 * pad, cell_width - 2 * pad, 3))
 
-                resized_tile = resize(tile, output_shape=(delta_y, delta_x, c))
+                y = j * cell_width
+                x = i * cell_width
 
-                y = int(s * y_range[i])
-                x = int(s * x_range[j])
-
-                canvas[s - y - delta_y:s - y, x:x + delta_x] = resized_tile
-                img_idx_dict[img_idx] = (x, x + delta_x, s - y - delta_y, s - y)
+                canvas[s - y - cell_width+pad:s - y - pad, x + pad:x+cell_width - pad] = resized_tile
+                img_idx_dict[img_idx] = (x, x + cell_width, s - y - cell_width, s - y)
 
     return canvas, img_idx_dict
