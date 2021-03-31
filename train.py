@@ -21,7 +21,8 @@ parser.add_argument('--epochs', default=101, type=int, help="Number of epochs.")
 parser.add_argument('--dropout', default=.05, type=float, help="Dropout probability.")
 parser.add_argument('--margin', default=2, type=float, help="Contrastive loss margin.")
 parser.add_argument('--seed', default=42, type=int, help="Random seed.")
-parser.add_argument('--split', default='crop', help=".")
+parser.add_argument('--split', default='crop', type=str, help="Train/test split by crop or by well.")
+parser.add_argument('--csize', default=64, type=int, help="Crop size (pixels).")
 args = vars(parser.parse_args())
 
 # prepare data
@@ -31,9 +32,14 @@ metadata = metadata.loc[metadata.moa.isin(['Neutral', 'PKC Inhibitor'])]
 
 np.random.seed(args['seed'])
 
+padding = int(args['csize']/2)
+scale = 64/float(args['csize'])
+print(scale)
+
 if args['split'] == 'crop':
 
-    tr_data = Boyd2019(args['data'], metadata, scale=1.0, train_test=True)
+    tr_data = Boyd2019(args['data'], metadata, padding=padding,
+                       scale=scale, train_test=True)
 
     te_1 = torch.load('test_1.pkl')
     te_2 = torch.load('test_2.pkl')
@@ -45,12 +51,12 @@ elif args['split'] == 'well':
     tr_metadata = metadata.sample(frac=0.7, weights=metadata.groupby('moa')['moa'].transform('count'))
     tr_metadata.to_csv('tr_seed_%s.tsv' % args['seed'], sep='\t', index=False)
 
-    tr_data = Boyd2019(args['data'], tr_metadata)
+    tr_data = Boyd2019(args['data'], tr_metadata, padding=padding, scale=scale)
 
     te_metadata = metadata.drop(tr_metadata.index)
     te_metadata.to_csv('te_seed_%s.tsv' % args['seed'], sep='\t', index=False)
 
-    te_data = Boyd2019(args['data'], te_metadata)
+    te_data = Boyd2019(args['data'], te_metadata, padding=padding, scale=scale)
 
 tr_loader = DataLoader(tr_data, shuffle=True, num_workers=8, batch_size=args['batch'])
 te_loader = DataLoader(te_data, shuffle=True, num_workers=8, batch_size=args['batch'])
