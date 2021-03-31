@@ -1,0 +1,21 @@
+name: janus
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.9
+  - pip
+  - codecov
+  - h5py
+  - numpy
+  - openpyxl
+  - pandas
+  - pytest-cov
+  - pytorch
+  - seaborn
+  - scikit-image
+  - scikit-learn
+  - torchvision
+  - tqdm
+  - umap-learn
