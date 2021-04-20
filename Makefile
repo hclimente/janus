@@ -7,8 +7,7 @@ setup: requirements.yaml data/boyd_2019/
 	mamba env create --force --prefix $(CONDA_ENV) --file requirements.yaml
 
 data/boyd_2019/:
-	git clone git@github.com:jcboyd/multi-cell-line.git ../multi-cell-line
-	ln -s ../multi-cell-line/cecog_out_propagate_0.5 data/boyd_2019
+	git clone git@github.com:jcboyd/multi-cell-line.git multi-cell-line; mv multi-cell-line/cecog_out_propagate_0.5 data/boyd_2019; rm -rf multi-cell-line
 
 jn:
 	$(CONDA_ACTIVATE); jupyter notebook --notebook-dir=notebooks/
