@@ -1,7 +1,7 @@
 import pandas as pd
 import torch
 
-from readers import HDF5Reader
+from janus.readers import HDF5Reader
 
 
 def test_get_fields():

@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from losses import ContrastiveLoss
+from janus.losses import ContrastiveLoss
 
 
 def test_forward():

@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from transforms import RandomRot90
+from janus.transforms import RandomRot90
 
 
 def test_random_rot90():

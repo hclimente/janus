@@ -7,9 +7,9 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import trange, tqdm
 
-from datasets import Boyd2019, MultiCellDataset
-from losses import ContrastiveLoss
-from networks import SiameseNet
+from janus.datasets import Boyd2019, MultiCellDataset
+from janus.losses import ContrastiveLoss
+from janus.networks import SiameseNet
 
 # parser
 parser = argparse.ArgumentParser()
@@ -23,6 +23,7 @@ parser.add_argument('--margin', default=2, type=float, help="Contrastive loss ma
 parser.add_argument('--seed', default=42, type=int, help="Random seed.")
 parser.add_argument('--split', default='crop', type=str, help="Train/test split by crop or by well.")
 parser.add_argument('--csize', default=64, type=int, help="Crop size (pixels).")
+
 args = vars(parser.parse_args())
 
 # prepare data

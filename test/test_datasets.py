@@ -2,8 +2,8 @@ import os
 import pandas as pd
 import torch
 
-from datasets import Boyd2019, MultiCellDataset
-from readers import HDF5Reader
+from janus.datasets import Boyd2019, MultiCellDataset
+from janus.readers import HDF5Reader
 
 
 def clean_pickles():

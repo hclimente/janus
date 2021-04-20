@@ -4,7 +4,9 @@ channels:
   - pytorch
   - defaults
 dependencies:
-  - python=3.6
+  - libblas=*=*_mkl
+  - python=3
+  - ipython
   - pip
   - codecov
   - flake8
@@ -20,3 +22,7 @@ dependencies:
   - torchvision
   - tqdm
   - umap-learn
+  - nextflow
+  - jupyter
+  - jupyter_nbextensions_configurator
+  - jupyter_contrib_nbextensions

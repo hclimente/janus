@@ -1,6 +1,6 @@
 import torch
 
-from networks import SiameseNet
+from janus.networks import SiameseNet
 
 
 def test_forward():

@@ -3,7 +3,7 @@ import time
 import numpy as np
 import torch
 
-from viz import tsne, umap, plot_cell, get_embedding
+from janus.viz import tsne, umap, plot_cell, get_embedding
 
 
 def test_tsne():

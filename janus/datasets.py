@@ -10,8 +10,8 @@ from torchvision import transforms
 import torch
 from torch.utils.data import Dataset
 
-from readers import HDF5Reader
-from transforms import RandomRot90
+from janus.readers import HDF5Reader
+from janus.transforms import RandomRot90
 
 
 class MultiCellDataset(Dataset):
