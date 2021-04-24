@@ -5,6 +5,7 @@ channels:
   - defaults
 dependencies:
   - libblas=*=*_mkl
+  - dvc
   - python=3
   - ipython
   - pip
