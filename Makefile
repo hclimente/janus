@@ -11,3 +11,6 @@ data/boyd_2019/:
 
 jn:
 	$(CONDA_ACTIVATE); jupyter notebook --notebook-dir=notebooks/
+
+train: src/train.nf
+	$(CONDA_ACTIVATE); nextflow src/train.nf -resume -profile gpu --gpus 9

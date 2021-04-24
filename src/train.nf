@@ -1,12 +1,12 @@
 #!/usr/bin/env nextflow
 
-params.data = file('../../data/boyd_2019')
-params.metadata = file('../../data/boyd_2019_PlateMap-KPP_MOA.xlsx')
+params.data = file('data/boyd_2019')
+params.metadata = file('data/boyd_2019_PlateMap-KPP_MOA.xlsx')
 params.split = 'crop'
 params.csize = 128
 params.gpus = 3
 
-train_script = file('../../train.py')
+train_script = file('train.py')
 dropout = [0, 0.05, 0.1, 0.25, 0.5]
 margin = [0.001, 0.01, 0.1, 1]
 
