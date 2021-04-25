@@ -2,6 +2,7 @@ CONDA_ENV = ./env/
 CONDA_ACTIVATE = eval "$$(conda shell.bash hook)"; conda activate $(CONDA_ENV)
 
 .PHONY: clean setup jn download_data
+all: train
 
 setup: $(CONDA_ENV) data/boyd_2019/
 
@@ -18,6 +19,9 @@ download_data:
 
 jn:
 	$(CONDA_ACTIVATE); jupyter notebook --notebook-dir=notebooks/
+
+train: src/train.nf
+	$(CONDA_ACTIVATE); nextflow src/train.nf -resume -profile gpu --gpus 9
 
 clean:
 	rm -rf env/

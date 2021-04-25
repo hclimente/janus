@@ -1,5 +1,4 @@
 data/boyd_2019/
 multi-cell-line
-src
 *.torch
 *.pkl
