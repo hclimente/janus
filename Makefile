@@ -5,9 +5,9 @@ CONDA_ACTIVATE = eval "$$(conda shell.bash hook)"; conda activate $(CONDA_ENV)
 all: train
 
 setup: $(CONDA_ENV) data/boyd_2019/
+	git config core.hooksPath .githooks
 
 $(CONDA_ENV): requirements.yaml
-	git config core.hooksPath .githooks
 	mamba env create --force --prefix $(CONDA_ENV) --file requirements.yaml
 
 data/boyd_2019/: data/boyd_2019.dvc
