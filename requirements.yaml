@@ -6,6 +6,8 @@ channels:
 dependencies:
   - libblas=*=*_mkl
   - dvc
+  - dvc-gdrive
+  - nbstripout
   - python=3
   - ipython
   - pip
