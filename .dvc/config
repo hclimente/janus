@@ -1,4 +1,5 @@
 [core]
-    remote = data_storage
-['remote "data_storage"']
-    url = gdrive://1I9Eu-_7y3pG0DZsvyY8-DouRTmCWvS8r
+    remote = inco
+['remote "inco"']
+    url = ssh://inco/data/hclimente/janus_dvc
+    port = 20022
