@@ -2,11 +2,12 @@ name: janus
 channels:
   - conda-forge
   - pytorch
+  - bioconda
   - defaults
 dependencies:
   - libblas=*=*_mkl
   - dvc
-  - dvc-gdrive
+  - dvc-ssh
   - nbstripout
   - python=3
   - ipython
@@ -19,6 +20,9 @@ dependencies:
   - pandas
   - pytest-cov
   - pytorch
+  - r
+  - rpy2
+  - r-tidyverse
   - seaborn
   - scikit-image
   - scikit-learn
@@ -26,6 +30,4 @@ dependencies:
   - tqdm
   - umap-learn
   - nextflow
-  - jupyter
-  - jupyter_nbextensions_configurator
-  - jupyter_contrib_nbextensions
+  - jupyterlab

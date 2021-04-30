@@ -17,8 +17,8 @@ download_data:
 	$(CONDA_ACTIVATE); dvc get https://github.com/jcboyd/multi-cell-line cecog_out_propagate_0.5
 	mv cecog_out_propagate_0.5 data/boyd_2019
 
-jn:
-	$(CONDA_ACTIVATE); jupyter notebook --notebook-dir=notebooks/
+jupyter:
+	$(CONDA_ACTIVATE); export PYTHONPATH=`pwd`:$${PYTHONPATH}; jupyter lab --notebook-dir=notebooks/
 
 train: src/train.nf
 	mkdir -p results/boyd_2019
