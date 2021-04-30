@@ -199,6 +199,7 @@ def test_split_train():
                ('moa3', {'moa': 3}),
                ('moa4', {'moa': 4}),
                ('moa5', {'moa': 5})]
+    clean_pickles()
 
     assert dataset == MultiCellDataset.split_train(dataset, False, 1)
     assert not os.path.isfile('train_1.pkl')
@@ -208,5 +209,42 @@ def test_split_train():
     assert len(train) == int(0.7 * len(dataset))
     assert os.path.isfile('train_1.pkl')
     assert os.path.isfile('test_1.pkl')
+
+    clean_pickles()
+
+    dataset_1 = [('A1', {'moa': 1}),
+                 ('A2', {'moa': 2}),
+                 ('A3', {'moa': 3}),
+                 ('A4', {'moa': 4}),
+                 ('A5', {'moa': 5})]
+    dataset_2 = [('B1', {'moa': 1}),
+                 ('B2', {'moa': 2}),
+                 ('B3', {'moa': 3}),
+                 ('B4', {'moa': 4}),
+                 ('B5', {'moa': 5})]
+    metadata = pd.DataFrame({'moa': [x for x in range(1, 6)]})
+
+    tr = MultiCellDataset(dataset_1, dataset_2, metadata, None, train_test=True)
+    assert len(tr.dataset_1) == int(0.7 * len(dataset_1))
+    assert len(tr.dataset_2) == int(0.7 * len(dataset_2))
+    assert os.path.isfile('train_1.pkl')
+    assert os.path.isfile('train_2.pkl')
+    assert os.path.isfile('test_1.pkl')
+    assert os.path.isfile('test_2.pkl')
+
+    te_1 = torch.load('test_1.pkl')
+    te_2 = torch.load('test_2.pkl')
+
+    te = MultiCellDataset(te_1, te_2, metadata)
+    assert len(te.dataset_1) == len(dataset_1) - int(0.7 * len(dataset_1))
+    assert len(te.dataset_2) == len(dataset_2) - int(0.7 * len(dataset_2))
+
+    tr_samples_1 = set([x[0] for x in tr.dataset_1])
+    tr_samples_2 = set([x[0] for x in tr.dataset_2])
+    te_samples_1 = set([x[0] for x in te.dataset_1])
+    te_samples_2 = set([x[0] for x in te.dataset_2])
+
+    assert not tr_samples_1.intersection(te_samples_1)
+    assert not tr_samples_2.intersection(te_samples_2)
 
     clean_pickles()
