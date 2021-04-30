@@ -1,23 +1,24 @@
 from functools import lru_cache
 
 import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.manifold import TSNE
-from umap import UMAP
-
 import numpy as np
+import seaborn as sns
 from skimage.transform import resize
+from sklearn.manifold import TSNE
+import torch
+from torch.utils.data import DataLoader
+from umap import UMAP
 
 
 def tsne(x, y):
 
-    x_emb = get_embedding(x, 'tsne')
+    x_emb = embed_matrix(x, 'tsne')
     xy_plot(x_emb, y, "t-SNE")
 
 
 def umap(x, y):
 
-    x_emb = get_embedding(x, 'umap')
+    x_emb = embed_matrix(x, 'umap')
     xy_plot(x_emb, y, "UMAP")
 
 
@@ -28,18 +29,20 @@ def xy_plot(x, y, emb='Dimension'):
     g.set_axis_labels(emb + ' 1', emb + ' 2')
 
 
-def get_embedding(x, emb):
+def embed_matrix(x, emb):
 
-    return __get_embedding(tuple(tuple(e) for e in x), emb)
+    return __embed_matrix(tuple(tuple(e) for e in x), emb)
 
 
 @lru_cache(maxsize=None)
-def __get_embedding(x, emb):
+def __embed_matrix(x, emb):
 
     if emb == 'tsne':
         x_emb = TSNE().fit_transform(x)
     elif emb == 'umap':
         x_emb = UMAP().fit_transform(x)
+    else:
+        raise NotImplementedError
 
     return x_emb
 
@@ -53,6 +56,43 @@ def plot_cell(crop):
     axes[0][1].imshow(crop[..., 1], cmap='Greys_r')
     axes[1][0].imshow(crop[..., 2], cmap='Greys_r')
     axes[1][1].imshow(crop)
+
+
+def sample_imgs(net, dataset, device='cpu', iters=100):
+
+    dataloader = DataLoader(dataset, shuffle=True, num_workers=8, batch_size=64)
+
+    imgs = []
+    embeddings = np.empty((0, 256))
+    moas = []
+    cell_line = np.empty((0,))
+
+    for i, data in enumerate(dataloader, 0):
+        img1, moa1, img2, moa2, _ = data
+        img1, img2 = img1.to(device), img2.to(device)
+        output1, output2 = net(img1, img2)
+
+        embeddings = np.concatenate((embeddings,
+                                    output1.detach().numpy(),
+                                    output2.detach().numpy()))
+        cell_line = np.concatenate((cell_line,
+                                    np.repeat('mda468', output1.shape[0]),
+                                    np.repeat('mda231', output2.shape[0])))
+        moas.extend(moa1)
+        moas.extend(moa2)
+
+        # denormalise images
+        #     all_imgs.append(img1 * std_mda468 + avg_mda468)
+        #     all_imgs.append(img2 * std_mda231 + avg_mda231)
+        imgs.append(img1)
+        imgs.append(img2)
+
+        if i == iters:
+            break
+
+    imgs = torch.cat(imgs).to(device)
+
+    return imgs, embeddings, moas, cell_line
 
 
 def plot_tiles(imgs, emb, grid_units=50, pad=1):
@@ -86,10 +126,8 @@ def plot_tiles(imgs, emb, grid_units=50, pad=1):
 
             if len(points) > 0:
 
-                img_idx = np.arange(nb_imgs)[idx_y & idx_x][0]  # take first avilable img in bin
+                img_idx = np.arange(nb_imgs)[idx_y & idx_x][0]  # take first available img in bin
                 tile = imgs[img_idx].permute(1, 2, 0)                
-
-                
                 resized_tile = resize(tile, output_shape=(cell_width - 2 * pad, cell_width - 2 * pad, 3))
 
                 y = j * cell_width

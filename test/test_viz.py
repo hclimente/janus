@@ -3,7 +3,7 @@ import time
 import numpy as np
 import torch
 
-from janus.viz import tsne, umap, plot_cell, get_embedding
+from janus.viz import tsne, umap, plot_cell, embed_matrix
 
 
 def test_tsne():
@@ -29,19 +29,19 @@ def test_plot_cell():
     plot_cell(crop)
 
 
-def test_get_embedding():
+def test_embed_matrix():
 
     x = np.random.rand(40, 10)
 
     start = time.time()
-    get_embedding(x, 'umap')
+    embed_matrix(x, 'umap')
     end = time.time()
 
     t_first = end - start
 
     for i in range(10):
         start = time.time()
-        get_embedding(x, 'umap')
+        embed_matrix(x, 'umap')
         end = time.time()
 
         t_other = end - start
