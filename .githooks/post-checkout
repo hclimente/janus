@@ -1,4 +1,3 @@
 #!/bin/sh
 eval "$(conda shell.bash hook)"; conda activate env/
-pytest test
-exec dvc git-hook pre-push $@
+exec dvc git-hook post-checkout $@
