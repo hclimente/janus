@@ -123,7 +123,7 @@ class Boyd2019(MultiCellDataset):
         return avg, std
 
     @staticmethod
-    def load_crops(crops_path, metadata, padding, scale=1.0, normalize=True, recompute_params=True):
+    def load_crops(crops_path, metadata, padding, scale=1.0, recompute_params=True, normalize=True):
 
         crops = list(HDF5Reader.get_crops(crops_path, metadata, padding, scale))
 
