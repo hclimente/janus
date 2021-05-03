@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 
 from janus.datasets import Boyd2019
-from janus.lococv import LocoCV
 from janus.networks import SiameseNet
+from src.lococv import LocoCV
 
 metadata = pd.DataFrame({'well': ['A01', 'B02'],
                          'moa': ['dmso', 'tp53']})
