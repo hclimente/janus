@@ -129,6 +129,7 @@ def test_load_parameters(capfd):
 
     clean_pickles()
 
+
 def test_multicelldataset():
 
     p = MultiCellDataset(None, None, None, None)

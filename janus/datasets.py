@@ -95,6 +95,8 @@ class Boyd2019(MultiCellDataset):
         # remove wells with no drug/dmso
         metadata = metadata[metadata['content'] != 'None']
 
+        metadata.index = metadata.well
+
         return metadata
 
     @staticmethod
