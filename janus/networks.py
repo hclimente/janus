@@ -8,8 +8,8 @@ class SiameseNet(nn.Module):
 
         if feature_extractor:
             self.convnet = nn.Sequential(feature_extractor.features[:idx_cutoff],
-                                         nn.Conv2d(256, 512, kernel_size=(3, 3), padding=(1, 1)),
-                                         nn.BatchNorm2d(512),
+                                         nn.Conv2d(256, 256, kernel_size=(3, 3), padding=(1, 1)),
+                                         nn.BatchNorm2d(256),
                                          nn.PReLU(),
                                          nn.MaxPool2d(2, stride=2))
 
