@@ -7,7 +7,7 @@ class SiameseNet(nn.Module):
         super(SiameseNet, self).__init__()
 
         if feature_extractor:
-            self.convnet = nn.Sequential(*list(feature_extractor.features)[:idx_cutoff],
+            self.convnet = nn.Sequential(feature_extractor.features[:idx_cutoff],
                                          nn.Conv2d(256, 512, kernel_size=(3, 3), padding=(1, 1)),
                                          nn.BatchNorm2d(512),
                                          nn.PReLU(),
