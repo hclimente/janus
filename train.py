@@ -29,7 +29,7 @@ args = vars(parser.parse_args())
 # prepare data
 metadata = Boyd2019.read_metadata(args['metadata'])
 ## filter by 2 moas and make train test
-metadata = metadata.loc[metadata.moa.isin(['Neutral', 'PKC Inhibitor'])]
+metadata = metadata.loc[metadata.moa.isin(['Neutral', 'EGF Receptor Kinase Inhibitor', 'Cysteine Protease Inhibitor', 'PKC Inhibitor', 'Tyrosine Kinase Inhibitor', 'Protein Tyrosine Phosphatase Inhibitor'])]
 
 np.random.seed(args['seed'])
 
