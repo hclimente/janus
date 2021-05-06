@@ -5,11 +5,15 @@ import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
+import torchvision.models as models
+from torchvision import transforms
 from tqdm import trange, tqdm
 
 from janus.datasets import Boyd2019, MultiCellDataset
 from janus.losses import ContrastiveLoss
 from janus.networks import SiameseNet
+from janus.transforms import RandomRot90, RGB
+
 
 # parser
 parser = argparse.ArgumentParser()
@@ -29,7 +33,7 @@ args = vars(parser.parse_args())
 # prepare data
 metadata = Boyd2019.read_metadata(args['metadata'])
 ## filter by 2 moas and make train test
-metadata = metadata.loc[metadata.moa.isin(['Neutral', 'EGF Receptor Kinase Inhibitor', 'Cysteine Protease Inhibitor', 'PKC Inhibitor', 'Tyrosine Kinase Inhibitor', 'Protein Tyrosine Phosphatase Inhibitor'])]
+metadata = metadata.loc[metadata.moa.isin(['Neutral', 'PKC Inhibitor'])]
 
 np.random.seed(args['seed'])
 
@@ -40,12 +44,24 @@ print(scale)
 if args['split'] == 'crop':
 
     tr_data = Boyd2019(args['data'], metadata, padding=padding,
-                       scale=scale, train_test=True)
+                       scale=scale, train_test=True,
+                       transform=transforms.Compose([
+                           transforms.RandomHorizontalFlip(),
+                           transforms.RandomVerticalFlip(),
+                           RandomRot90(),
+                           transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                std=[0.229, 0.224, 0.225])]))
 
     te_1 = torch.load('test_1.pkl')
     te_2 = torch.load('test_2.pkl')
 
-    te_data = MultiCellDataset(te_1, te_2, metadata)
+    te_data = MultiCellDataset(te_1, te_2, metadata,
+        transform=transforms.Compose([
+                transforms.RandomHorizontalFlip(),
+                transforms.RandomVerticalFlip(),
+                RandomRot90(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                     std=[0.229, 0.224, 0.225])]))
 
 elif args['split'] == 'well':
 
@@ -66,7 +82,10 @@ te_loader = DataLoader(te_data, shuffle=True, num_workers=8, batch_size=args['ba
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 print(device)
 
-net = SiameseNet(p_dropout=args['dropout']).to(device)
+vgg19 = models.vgg19(pretrained=True)
+
+
+net = SiameseNet(feature_extractor=vgg19, p_dropout=args['dropout']).to(device)
 criterion = ContrastiveLoss(margin=args['margin'])
 optimizer = torch.optim.Adam(net.parameters(), lr=0.0005)
 
