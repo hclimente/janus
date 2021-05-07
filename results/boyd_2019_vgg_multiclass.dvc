@@ -1,0 +1,5 @@
+outs:
+- md5: ee67b200ae4154e316d47f524960286b.dir
+  size: 12746925692
+  nfiles: 220
+  path: boyd_2019_vgg_multiclass
