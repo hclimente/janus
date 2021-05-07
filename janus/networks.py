@@ -14,10 +14,10 @@ class SiameseNet(nn.Module):
                                          nn.MaxPool2d(2, stride=2))
 
             # freeze weights
-            for name, p in self.convnet.named_parameters():
-                idx_param = int(name.split('.')[0])
-                if idx_param <= idx_cutoff:
-                    p.requires_grad = False
+            #for name, p in self.convnet.named_parameters():
+            #    idx_param = int(name.split('.')[0])
+            #    if idx_param <= idx_cutoff:
+            #        p.requires_grad = False
         else:
             self.convnet = nn.Sequential(nn.Conv2d(3, 32, kernel_size=(3, 3), padding=(1, 1)),
                                          nn.BatchNorm2d(32),

@@ -8,8 +8,8 @@ params.gpus = 3
 
 train_script = file('train.py')
 params.out = '.'
-dropout = [0, 0.05, 0.1, 0.25, 0.5]
-margin = [0.001, 0.01, 0.1, 1]
+dropout = [0.1, 0.5]
+margin = [0.1, 1]
 
 process train {
 
@@ -18,7 +18,7 @@ process train {
 
     input:
         each D from dropout
-        each I from 1..5
+        each I from 1..3
         each M from margin
         val split from params.split
         val csize from params.csize
@@ -33,7 +33,7 @@ process train {
         file 'test_*.pkl'
 
     """
-    CUDA_VISIBLE_DEVICES=${(I-1) % Math.min(5, params.gpus)} ./$train_script --dropout $D --margin $M --seed $I --data $train_data --metadata $train_metadata --split $split --csize $csize
+    CUDA_VISIBLE_DEVICES=${(I-1) % Math.min(3, params.gpus)} ./$train_script --dropout $D --margin $M --seed $I --data $train_data --metadata $train_metadata --split $split --csize $csize
     mv train_1.pkl train_1_seed_${I}.pkl
     mv train_2.pkl train_2_seed_${I}.pkl
     mv test_1.pkl  test_1_seed_${I}.pkl

@@ -1,0 +1,5 @@
+outs:
+- md5: 7c0ac46b871052bd0034b54c30a7355e.dir
+  size: 3921844843
+  nfiles: 36
+  path: boyd_2019_vgg_finetune
