@@ -16,9 +16,8 @@ class Normalize(object):
 
     def __call__(self, img):
 
-        max = torch.amax(img, dim=(1, 2)).reshape(
-            3, 1, 1
-        )  # torch.quantile(channel, 0.999)
+        # torch.quantile(channel, 0.999)
+        max = torch.amax(img, dim=(1, 2)).reshape(3, 1, 1)
         min = torch.amin(img, dim=(1, 2)).reshape(3, 1, 1)
         # clip image
         img = torch.max(torch.min(img, max), min)
