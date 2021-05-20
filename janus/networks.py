@@ -3,9 +3,14 @@ import torch.nn as nn
 
 class SiameseNet(nn.Module):
     def __init__(
-        self, p_dropout=0, embedding_dim=256, feature_extractor=None, idx_cutoff=19
+        self,
+        p_dropout=0,
+        embedding_dim=256,
+        feature_extractor=None,
+        idx_cutoff=19,
+        **kwargs
     ):
-        super(SiameseNet, self).__init__()
+        super(SiameseNet, self).__init__(**kwargs)
 
         if feature_extractor:
             self.convnet = nn.Sequential(

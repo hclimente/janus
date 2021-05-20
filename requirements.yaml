@@ -22,6 +22,7 @@ dependencies:
   - pandas
   - pytest-cov
   - pytorch
+  - pytorch-lightning
   - r
   - rpy2
   - r-tidyverse
