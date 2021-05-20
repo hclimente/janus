@@ -34,14 +34,14 @@ def test_embed_matrix():
     x = np.random.rand(40, 10)
 
     start = time.time()
-    embed_matrix(x, 'umap')
+    embed_matrix(x, "umap")
     end = time.time()
 
     t_first = end - start
 
     for i in range(10):
         start = time.time()
-        embed_matrix(x, 'umap')
+        embed_matrix(x, "umap")
         end = time.time()
 
         t_other = end - start

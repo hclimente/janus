@@ -5,10 +5,9 @@ from janus.datasets import Boyd2019
 from janus.networks import SiameseNet
 from src.lococv import LocoCV
 
-metadata = pd.DataFrame({'well': ['A01', 'B02'],
-                         'moa': ['dmso', 'tp53']})
+metadata = pd.DataFrame({"well": ["A01", "B02"], "moa": ["dmso", "tp53"]})
 metadata.index = metadata.well
-d = Boyd2019('test/data', metadata)
+d = Boyd2019("test/data", metadata)
 net = SiameseNet()
 
 loco = LocoCV(d, net)

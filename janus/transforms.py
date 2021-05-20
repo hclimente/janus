@@ -1,10 +1,8 @@
 from numpy import random
-import numpy as np
 import torch
 
 
 class RandomRot90(object):
-
     def __init__(self):
         pass
 
@@ -13,13 +11,14 @@ class RandomRot90(object):
 
 
 class Normalize(object):
-
     def __init__(self):
         pass
 
     def __call__(self, img):
 
-        max = torch.amax(img, dim=(1, 2)).reshape(3, 1, 1) # torch.quantile(channel, 0.999)
+        max = torch.amax(img, dim=(1, 2)).reshape(
+            3, 1, 1
+        )  # torch.quantile(channel, 0.999)
         min = torch.amin(img, dim=(1, 2)).reshape(3, 1, 1)
         # clip image
         img = torch.max(torch.min(img, max), min)
@@ -29,7 +28,6 @@ class Normalize(object):
 
 
 class RGB(object):
-
     def __init__(self):
         pass
 

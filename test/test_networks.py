@@ -40,4 +40,3 @@ def test_vgg():
 
     assert torch.all(output1 == net.embedding(img1))
     assert torch.all(output2 == net.embedding(img2))
-

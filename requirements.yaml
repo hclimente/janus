@@ -6,6 +6,8 @@ channels:
   - defaults
 dependencies:
   - libblas=*=*_mkl
+  - black
+  - flake8
   - dvc
   - dvc-ssh
   - nbstripout

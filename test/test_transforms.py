@@ -6,9 +6,13 @@ from janus.transforms import Normalize, RandomRot90, RGB
 
 def test_random_rot90():
     img0 = torch.linspace(0, 4, 5).repeat(3, 5, 1)
-    img90 = torch.tensor(np.linspace(np.repeat(0, 5), np.repeat(4, 5), 5)).repeat(3, 1, 1)
+    img90 = torch.tensor(np.linspace(np.repeat(0, 5), np.repeat(4, 5), 5)).repeat(
+        3, 1, 1
+    )
     img180 = torch.linspace(4, 0, 5).repeat(3, 5, 1)
-    img270 = torch.tensor(np.linspace(np.repeat(4, 5), np.repeat(0, 5), 5)).repeat(3, 1, 1)
+    img270 = torch.tensor(np.linspace(np.repeat(4, 5), np.repeat(0, 5), 5)).repeat(
+        3, 1, 1
+    )
     imgs = [img0, img90, img180, img270]
 
     rot90 = RandomRot90()
@@ -34,6 +38,7 @@ def test_normalize():
     good_img = torch.stack((ch1_n, ch2_n, ch1_n))
 
     assert torch.all(good_img == norm_img)
+
 
 def test_rgb():
 
