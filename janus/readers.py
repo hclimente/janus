@@ -34,7 +34,7 @@ class HDF5Reader:
                         field_no,
                     )
 
-                    field = f["%s/image/channel" % (base_path)][()]
+                    field = f["%s/image/channel" % base_path][()]
                     info = {
                         "center": f["%s/feature/%s/center" % (base_path, channel)][()],
                         "well": well,
