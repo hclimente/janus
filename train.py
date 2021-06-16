@@ -153,7 +153,7 @@ parser = pl.Trainer.add_argparse_args(parser)
 if __name__ == "__main__":
 
     args = parser.parse_args()
-    pl.seed_everything(args.seed, workers=True)
+    pl.seed_everything(args.seed)
 
     checkpoint_callback = ModelCheckpoint(monitor="val_loss")
 
