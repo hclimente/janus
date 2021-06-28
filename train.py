@@ -4,6 +4,7 @@ import os
 
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.loggers import TensorBoardLogger
 import torch
 from torch.utils.data import DataLoader
 import torchvision.models as models
@@ -61,10 +62,27 @@ class Janus(SiameseNet, pl.LightningModule):
         )
 
     def validation_step(self, batch, batch_idx):
-        x1, _, x2, _, y = batch
+        x1, moas1, x2, moas2, y = batch
         output1, output2 = self.forward(x1, x2)
         loss = self.criterion(output1, output2, y)
         self.log("val_loss", loss)
+        val_dict = {"val_loss" : loss, "emb1" : output1, "emb2" : output2,
+                    "moas1" : moas1, "moas2" : moas2}
+        return val_dict
+
+    def validation_epoch_end(self, validation_step_outputs):
+        loss = 0
+        embedding = torch.empty((0,))
+        labels = [] 
+
+        for val_dict in validation_step_outputs[:2]:
+            loss += val_dict["val_loss"]
+            embedding = torch.cat([embedding, val_dict["emb1"], val_dict["emb2"]])
+            labels.extend(val_dict["moas1"] + val_dict["moas2"])
+
+        self.logger.experiment.add_embedding(embedding,
+                                             metadata=labels,
+                                             global_step=self.current_epoch)
         return loss
 
     def val_dataloader(self):
@@ -157,8 +175,10 @@ if __name__ == "__main__":
 
     checkpoint_callback = ModelCheckpoint(monitor="val_loss")
 
+    logger = TensorBoardLogger("runs", name="janus", default_hp_metric=False)
+
     trainer = pl.Trainer.from_argparse_args(
-        args, callbacks=[checkpoint_callback], accelerator="ddp"
+        args, callbacks=[checkpoint_callback], accelerator="ddp", logger=logger
     )
 
     model = Janus(
@@ -167,5 +187,10 @@ if __name__ == "__main__":
         p_dropout=args.dropout,
         split_by=args.split,
     )
+
+    dummy_inputs = torch.randn((1, 3, args.size, args.size))
+    logger.experiment.add_graph(model, [dummy_inputs, dummy_inputs])
+
     model.train_test_split(args.data, args.metadata, args.size, args.seed)
     trainer.fit(model)
+

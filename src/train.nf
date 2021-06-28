@@ -33,7 +33,7 @@ process train {
         file 'test_*.pkl'
 
     """
-    CUDA_VISIBLE_DEVICES=${(I-1) % Math.min(3, params.gpus)} ./$train_script --dropout $D --margin $M --seed $I --data $train_data --metadata $train_metadata --split $split --csize $csize
+    CUDA_VISIBLE_DEVICES=${(I-1) % Math.min(3, params.gpus)} ./$train_script --dropout $D --margin $M --seed $I --data $train_data --metadata $train_metadata --split $split --size $csize
     mv train_1.pkl train_1_seed_${I}.pkl
     mv train_2.pkl train_2_seed_${I}.pkl
     mv test_1.pkl  test_1_seed_${I}.pkl
