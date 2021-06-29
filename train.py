@@ -66,23 +66,28 @@ class Janus(SiameseNet, pl.LightningModule):
         output1, output2 = self.forward(x1, x2)
         loss = self.criterion(output1, output2, y)
         self.log("val_loss", loss)
-        val_dict = {"val_loss" : loss, "emb1" : output1, "emb2" : output2,
-                    "moas1" : moas1, "moas2" : moas2}
+        val_dict = {
+            "val_loss": loss,
+            "emb1": output1,
+            "emb2": output2,
+            "moas1": moas1,
+            "moas2": moas2,
+        }
         return val_dict
 
     def validation_epoch_end(self, validation_step_outputs):
-        loss = 0
         embedding = torch.empty((0,))
-        labels = [] 
+        labels = []
 
-        for val_dict in validation_step_outputs[:2]:
-            loss += val_dict["val_loss"]
-            embedding = torch.cat([embedding, val_dict["emb1"], val_dict["emb2"]])
-            labels.extend(val_dict["moas1"] + val_dict["moas2"])
+        if self.current_epoch % 5 == 1:
+            for val_dict in validation_step_outputs[:4]:
+                embedding = torch.cat([embedding, val_dict["emb1"], val_dict["emb2"]])
+                labels.extend(val_dict["moas1"] + val_dict["moas2"])
 
-        self.logger.experiment.add_embedding(embedding,
-                                             metadata=labels,
-                                             global_step=self.current_epoch)
+            self.logger.experiment.add_embedding(
+                embedding, metadata=labels, global_step=self.current_epoch)
+
+        loss = torch.mean(val_dict["val_loss"] for val_dict in validation_step_outputs)
         return loss
 
     def val_dataloader(self):

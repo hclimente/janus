@@ -44,10 +44,10 @@ class MultiCellDataset(Dataset):
         same_moa = random.getrandbits(1)
         cell2, moa2 = self.sample_crops(moa1, same_moa, self.dataset_2)
 
-# TODO: If we're loading torch.Tensors rather than PIL.Images, we should write our own augmentations
-#        if self.transform:
-#            cell1 = self.transform(cell1)
-#            cell2 = self.transform(cell2)
+        # TODO: If we're loading torch.Tensors rather than PIL.Images, we should write our own augmentations
+        #        if self.transform:
+        #            cell1 = self.transform(cell1)
+        #            cell2 = self.transform(cell2)
 
         return cell1, moa1, cell2, moa2, same_moa
 
