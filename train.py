@@ -85,9 +85,11 @@ class Janus(SiameseNet, pl.LightningModule):
                 labels.extend(val_dict["moas1"] + val_dict["moas2"])
 
             self.logger.experiment.add_embedding(
-                embedding, metadata=labels, global_step=self.current_epoch)
+                embedding, metadata=labels, global_step=self.current_epoch
+            )
 
-        loss = torch.mean(val_dict["val_loss"] for val_dict in validation_step_outputs)
+        loss = torch.mean(torch.stack([val_dict["val_loss"]
+                          for val_dict in validation_step_outputs]))
         return loss
 
     def val_dataloader(self):
@@ -198,4 +200,3 @@ if __name__ == "__main__":
 
     model.train_test_split(args.data, args.metadata, args.size, args.seed)
     trainer.fit(model)
-
