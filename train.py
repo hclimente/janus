@@ -90,8 +90,9 @@ class Janus(SiameseNet, pl.LightningModule):
                 embedding, metadata=labels, global_step=self.current_epoch
             )
 
-        loss = torch.mean(torch.stack([val_dict["val_loss"]
-                          for val_dict in validation_step_outputs]))
+        loss = torch.mean(
+            torch.stack([val_dict["val_loss"] for val_dict in validation_step_outputs])
+        )
         return loss
 
     def val_dataloader(self):
