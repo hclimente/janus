@@ -44,7 +44,8 @@ class MultiCellDataset(Dataset):
         same_moa = random.getrandbits(1)
         cell2, moa2 = self.sample_crops(moa1, same_moa, self.dataset_2)
 
-        # TODO: If we're loading torch.Tensors rather than PIL.Images, we should write our own augmentations
+        # TODO: If we're loading torch.Tensors rather than PIL.Images,
+        #  we should write our own augmentations
         #        if self.transform:
         #            cell1 = self.transform(cell1)
         #            cell2 = self.transform(cell2)
@@ -175,3 +176,34 @@ class Boyd2019(MultiCellDataset):
             crops = [((x[0] - avg) / std, x[1]) for x in crops]
 
         return crops
+
+
+class CellCognition(MultiCellDataset):
+    def __init__(
+        self,
+        data_path,
+        metadata,
+        train_test=False,
+    ):
+
+        mda231 = list(
+            HDF5Reader.get_features(
+                join(
+                    data_path,
+                    "22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231",
+                ),
+                metadata,
+            )
+        )
+
+        mda468 = list(
+            HDF5Reader.get_features(
+                join(
+                    data_path,
+                    "22_384_20X-hNA_D_F_C3_C5_20160032_2016.01.25.16.27.22_MDA468",
+                ),
+                metadata,
+            )
+        )
+
+        super().__init__(mda231, mda468, metadata, train_test=train_test)

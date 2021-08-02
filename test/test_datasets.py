@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import torch
 
-from janus.datasets import Boyd2019, MultiCellDataset
+from janus.datasets import Boyd2019, CellCognition, MultiCellDataset
 from janus.readers import HDF5Reader
 
 path1 = "test/data/22_384_20X-hNA_D_F_C3_C5_20160031_2016.01.25.17.23.13_MDA231/"
@@ -275,3 +275,19 @@ def test_split_train():
     assert not tr_samples_2.intersection(te_samples_2)
 
     clean_pickles()
+
+
+def test_CellCognition():
+
+    metadata = pd.DataFrame({"well": ["A01", "B02"], "moa": ["dmso", "tp53"]})
+    c = CellCognition("test/data", metadata)
+
+    assert len(c.dataset_1) == 891
+    assert all([len(x[0]) == 517 for x in c.dataset_1])
+    assert all([type(x[1]) is dict for x in c.dataset_1])
+    assert not os.path.isfile(path1 + "norm_params.pkl")
+
+    assert len(c.dataset_2) == 609
+    assert all([len(x[0]) == 517 for x in c.dataset_2])
+    assert all([type(x[1]) is dict for x in c.dataset_2])
+    assert not os.path.isfile(path2 + "norm_params.pkl")
