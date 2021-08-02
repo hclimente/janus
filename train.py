@@ -25,6 +25,7 @@ class Janus(SiameseNet, pl.LightningModule):
         pretrain=False,
         idx_cutoff=19,
         split_by="well",
+        lr=0.005,
     ):
         if pretrain:
             vgg19 = models.vgg19(pretrained=True)
@@ -42,6 +43,7 @@ class Janus(SiameseNet, pl.LightningModule):
 
         self.criterion = ContrastiveLoss(margin=margin)
         self.split_by = split_by
+        self.lr = lr
         self.save_hyperparameters()
 
     def training_step(self, batch, batch_idx):
@@ -114,7 +116,7 @@ class Janus(SiameseNet, pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = parent_parser.add_argument_group("Janus")
         parser.add_argument("--batch", default=64, type=int, help="Batch size.")
-        parser.add_argument("--epochs", default=101, type=int, help="Number of epochs.")
+        parser.add_argument("--epochs", default=100, type=int, help="Number of epochs.")
         parser.add_argument(
             "--dropout", default=0.05, type=float, help="Dropout probability."
         )
@@ -130,7 +132,7 @@ class Janus(SiameseNet, pl.LightningModule):
         parser.add_argument("--seed", default=42, type=int, help="Random seed.")
         parser.add_argument(
             "--split",
-            default="crop",
+            default="well",
             type=str,
             choices=["well", "crop"],
             help="Train/test split by crop or by well.",
@@ -157,9 +159,7 @@ if __name__ == "__main__":
 
     checkpoint_callback = ModelCheckpoint(monitor="val_loss")
 
-    trainer = pl.Trainer.from_argparse_args(
-        args, callbacks=[checkpoint_callback], accelerator="ddp"
-    )
+    trainer = pl.Trainer.from_argparse_args(args, callbacks=[checkpoint_callback])
 
     model = Janus(
         margin=args.margin,

@@ -2,7 +2,7 @@
 
 params.data = file('data/boyd_2019')
 params.metadata = file('data/boyd_2019_PlateMap-KPP_MOA.xlsx')
-params.split = 'crop'
+params.split = 'well'
 params.csize = 128
 params.gpus = 3
 
@@ -33,7 +33,7 @@ process train {
         file 'test_*.pkl'
 
     """
-    CUDA_VISIBLE_DEVICES=${(I-1) % Math.min(3, params.gpus)} ./$train_script --dropout $D --margin $M --seed $I --data $train_data --metadata $train_metadata --split $split --csize $csize
+    ./$train_script --dropout $D --margin $M --seed $I --data $train_data --metadata $train_metadata --split $split --size $csize --gpus $params.gpus --accelerator ddp --auto_lr_find True
     mv train_1.pkl train_1_seed_${I}.pkl
     mv train_2.pkl train_2_seed_${I}.pkl
     mv test_1.pkl  test_1_seed_${I}.pkl
