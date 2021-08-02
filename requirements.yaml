@@ -1,7 +1,8 @@
 name: janus
 channels:
-  - conda-forge
   - pytorch
+  - nvidia
+  - conda-forge
   - bioconda
   - defaults
 dependencies:
@@ -35,3 +36,4 @@ dependencies:
   - nextflow
   - jupyterlab
   - ipywidgets
+  - cudatoolkit=11.1
