@@ -15,6 +15,7 @@ class HDF5Reader:
     def get_fields(plate, metadata, channel="primary__primary4"):
 
         wells = metadata["well"].to_list()
+        channels = ["primary__primary4", "secondary__propagate", "tertiary__expanded"]
 
         for well in wells:
 
@@ -37,6 +38,12 @@ class HDF5Reader:
                     field = f["%s/image/channel" % base_path][()]
                     info = {
                         "center": f["%s/feature/%s/center" % (base_path, channel)][()],
+                        "features": np.hstack(
+                            [
+                                f["%s/feature/%s/object_features" % (base_path, c)][()]
+                                for c in channels
+                            ]
+                        ),
                         "well": well,
                         "field_no": field_no,
                         "moa": metadata.moa.values[metadata.well == well][0],
@@ -69,3 +76,12 @@ class HDF5Reader:
                     crop = F.interpolate(crop[None], size=(re_h, re_w))[0]
 
                 yield crop, info
+
+    @staticmethod
+    def get_features(plate, metadata):
+
+        for _, info in HDF5Reader.get_fields(plate, metadata):
+            feature_matrix = info["features"]
+
+            for features in feature_matrix:
+                yield torch.Tensor(features), info
