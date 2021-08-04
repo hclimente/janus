@@ -7,40 +7,26 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 import torch
 from torch.utils.data import DataLoader
-import torchvision.models as models
-from torchvision import transforms
 
-from janus.datasets import Boyd2019
+from janus.datasets import Boyd2019, CellCognition
 from janus.losses import ContrastiveLoss
-from janus.networks import CSN
-from janus.transforms import RandomRot90
-from janus.utils import split_by_crop, split_by_well
+from janus.networks import FCSN
+from janus.utils import split_features_by_well
 
 
-class Janus(CSN, pl.LightningModule):
+class Janus(FCSN, pl.LightningModule):
     def __init__(
         self,
         p_dropout=0,
         embedding_dim=256,
         margin=2.0,
-        pretrain=False,
-        idx_cutoff=19,
         split_by="well",
         lr=0.005,
     ):
-        if pretrain:
-            vgg19 = models.vgg19(pretrained=True)
-            super(Janus, self).__init__(
+        super(Janus, self).__init__(
                 p_dropout=p_dropout,
                 embedding_dim=embedding_dim,
-                feature_extractor=vgg19,
-                idx_cutoff=idx_cutoff,
-            )
-        else:
-            super(Janus, self).__init__(
-                p_dropout=p_dropout,
-                embedding_dim=embedding_dim,
-            )
+        )
 
         self.criterion = ContrastiveLoss(margin=margin)
         self.split_by = split_by
@@ -81,7 +67,7 @@ class Janus(CSN, pl.LightningModule):
         embedding = torch.empty((0,))
         labels = []
 
-        if self.current_epoch % 5 == 1:
+        if self.current_epoch % 5 == 0:
             for val_dict in validation_step_outputs[:4]:
                 embedding = torch.cat([embedding, val_dict["emb1"], val_dict["emb2"]])
                 labels.extend(val_dict["moas1"] + val_dict["moas2"])
@@ -107,36 +93,16 @@ class Janus(CSN, pl.LightningModule):
         optimizer = torch.optim.Adam(self.parameters(), lr=0.0005)
         return optimizer
 
-    def train_test_split(self, data, metadata, crop_size, seed):
-
-        padding = int(crop_size / 2)
-        scale = 64 / float(crop_size)
-        trfm = [
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomVerticalFlip(),
-            RandomRot90(),
-        ]
-
-        if self.hparams.pretrain:
-            vgg_norm = transforms.Normalize(
-                mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-            )
-            trfm.append(vgg_norm)
-
-        trfm = transforms.Compose(trfm)
+    def train_test_split(self, data, metadata, seed):
 
         # prepare data
         metadata = Boyd2019.read_metadata(metadata)
         metadata = metadata.loc[metadata.moa.isin(["Neutral", "PKC Inhibitor"])]
 
         if self.split_by == "crop":
-            self.tr_data, self.te_data = split_by_crop(
-                data, metadata, seed, padding, scale, trfm
-            )
+            pass
         elif self.split_by == "well":
-            self.tr_data, self.te_data = split_by_well(
-                data, metadata, seed, padding, scale, trfm
-            )
+            self.tr_data, self.te_data = split_features_by_well(data, metadata, seed)
 
     @staticmethod
     def add_model_specific_args(parent_parser):
@@ -149,12 +115,6 @@ class Janus(CSN, pl.LightningModule):
         parser.add_argument(
             "--margin", default=2, type=float, help="Contrastive loss margin."
         )
-        parser.add_argument(
-            "--pretrain",
-            default=False,
-            type=bool,
-            help="Use pre-trained network (vgg19).",
-        )
         parser.add_argument("--seed", default=42, type=int, help="Random seed.")
         parser.add_argument(
             "--split",
@@ -163,7 +123,6 @@ class Janus(CSN, pl.LightningModule):
             choices=["well", "crop"],
             help="Train/test split by crop or by well.",
         )
-        parser.add_argument("--size", default=64, type=int, help="Crop size (pixels).")
         return parent_parser
 
 
@@ -193,13 +152,12 @@ if __name__ == "__main__":
 
     model = Janus(
         margin=args.margin,
-        pretrain=args.pretrain,
         p_dropout=args.dropout,
         split_by=args.split,
     )
 
-    dummy_inputs = torch.randn((1, 3, args.size, args.size))
+    dummy_inputs = torch.randn((1, 3, 517))
     logger.experiment.add_graph(model, [dummy_inputs, dummy_inputs])
 
-    model.train_test_split(args.data, args.metadata, args.size, args.seed)
+    model.train_test_split(args.data, args.metadata, args.seed)
     trainer.fit(model)

@@ -24,5 +24,9 @@ train: src/train.nf
 	mkdir -p results/boyd_2019
 	$(CONDA_ACTIVATE); nextflow src/train.nf --out results/boyd_2019 -resume -profile gpu --gpus 9
 
+fc_train: src/fc_train.nf
+	mkdir -p results/boyd_2019
+	$(CONDA_ACTIVATE); nextflow src/fc_train.nf --out results/boyd_2019 -resume -profile gpu --gpus 9
+
 clean:
 	rm -rf env/

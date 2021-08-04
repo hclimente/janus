@@ -1,7 +1,7 @@
 import torch
 import torchvision.models as models
 
-from janus.networks import SiameseNet
+from janus.networks import CSN
 
 img1 = torch.rand((1, 3, 64, 64))
 img2 = torch.rand((1, 3, 64, 64))
@@ -9,7 +9,7 @@ img2 = torch.rand((1, 3, 64, 64))
 
 def test_forward():
 
-    net = SiameseNet()
+    net = CSN()
 
     output1, output2 = net(img1, img2)
 
@@ -22,7 +22,7 @@ def test_forward():
 
 def test_embedding():
 
-    net = SiameseNet(embedding_dim=512)
+    net = CSN(embedding_dim=512)
 
     output1, output2 = net(img1, img2)
 
@@ -34,7 +34,7 @@ def test_embedding():
 def test_vgg():
 
     vgg19 = models.vgg19(pretrained=True)
-    net = SiameseNet(feature_extractor=vgg19)
+    net = CSN(feature_extractor=vgg19)
 
     output1, output2 = net(img1, img2)
 

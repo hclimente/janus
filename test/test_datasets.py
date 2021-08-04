@@ -282,7 +282,7 @@ def test_CellCognition():
     metadata = pd.DataFrame({"well": ["A01", "B02"], "moa": ["dmso", "tp53"]})
     c = CellCognition("test/data", metadata)
 
-    assert len(c.dataset_1) == 891
+    assert len(c.dataset_1) == 880
     assert all([len(x[0]) == 517 for x in c.dataset_1])
     assert all([type(x[1]) is dict for x in c.dataset_1])
     assert not os.path.isfile(path1 + "norm_params.pkl")

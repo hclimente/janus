@@ -2,13 +2,13 @@ import numpy as np
 import pandas as pd
 
 from janus.datasets import Boyd2019
-from janus.networks import SiameseNet
+from janus.networks import CSN
 from src.lococv import LocoCV
 
 metadata = pd.DataFrame({"well": ["A01", "B02"], "moa": ["dmso", "tp53"]})
 metadata.index = metadata.well
 d = Boyd2019("test/data", metadata)
-net = SiameseNet()
+net = CSN()
 
 loco = LocoCV(d, net)
 df_profiles = loco.construct_profiles()

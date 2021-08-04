@@ -195,6 +195,7 @@ class CellCognition(MultiCellDataset):
                 metadata,
             )
         )
+        mda231 = [x for x in mda231 if not torch.any(torch.isnan(x[0]))]
 
         mda468 = list(
             HDF5Reader.get_features(
@@ -205,5 +206,6 @@ class CellCognition(MultiCellDataset):
                 metadata,
             )
         )
+        mda468 = [x for x in mda468 if not torch.any(torch.isnan(x[0]))]
 
         super().__init__(mda231, mda468, metadata, train_test=train_test)
