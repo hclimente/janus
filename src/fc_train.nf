@@ -25,17 +25,13 @@ process train {
         file train_metadata from params.metadata
 
     output:
-        file "sn_*.tsv"
-        file "sn_*_100.torch"
-        file 'train_*.pkl'
-        file 'test_*.pkl'
+        // file "sn_*.tsv"
+        file "fc_*.ckpt"
+        file "tr_seed_${I}.tsv"
+        file "te_seed_${I}.tsv"
 
     """
     ./$train_script --dropout $D --margin $M --seed $I --data $train_data --metadata $train_metadata --split $split --gpus $params.gpus --accelerator ddp --auto_lr_find True
-    mv train_1.pkl train_1_seed_${I}.pkl
-    mv train_2.pkl train_2_seed_${I}.pkl
-    mv test_1.pkl  test_1_seed_${I}.pkl
-    mv test_2.pkl  test_2_seed_${I}.pkl
     """
 }
 

@@ -6,6 +6,10 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
 import torch
+import torch.multiprocessing
+
+# address https://github.com/facebookresearch/maskrcnn-benchmark/issues/103
+torch.multiprocessing.set_sharing_strategy("file_system")
 from torch.utils.data import DataLoader
 
 from janus.datasets import Boyd2019, CellCognition
@@ -17,6 +21,7 @@ from janus.utils import split_features_by_well
 class Janus(FCSN, pl.LightningModule):
     def __init__(
         self,
+        args,
         p_dropout=0,
         embedding_dim=256,
         margin=2.0,
@@ -24,10 +29,11 @@ class Janus(FCSN, pl.LightningModule):
         lr=0.005,
     ):
         super(Janus, self).__init__(
-                p_dropout=p_dropout,
-                embedding_dim=embedding_dim,
+            p_dropout=p_dropout,
+            embedding_dim=embedding_dim,
         )
 
+        self.args = args
         self.criterion = ContrastiveLoss(margin=margin)
         self.split_by = split_by
         self.lr = lr
@@ -44,9 +50,10 @@ class Janus(FCSN, pl.LightningModule):
         return DataLoader(
             self.tr_data,
             shuffle=True,
-            batch_size=args.batch,
+            batch_size=self.args.batch,
             num_workers=os.cpu_count(),
             pin_memory=True,
+            persistent_workers=True,
         )
 
     def validation_step(self, batch, batch_idx):
@@ -54,39 +61,15 @@ class Janus(FCSN, pl.LightningModule):
         output1, output2 = self.forward(x1, x2)
         loss = self.criterion(output1, output2, y)
         self.log("val_loss", loss)
-        val_dict = {
-            "val_loss": loss,
-            "emb1": output1,
-            "emb2": output2,
-            "moas1": moas1,
-            "moas2": moas2,
-        }
-        return val_dict
-
-    def validation_epoch_end(self, validation_step_outputs):
-        embedding = torch.empty((0,))
-        labels = []
-
-        if self.current_epoch % 5 == 0:
-            for val_dict in validation_step_outputs[:4]:
-                embedding = torch.cat([embedding, val_dict["emb1"], val_dict["emb2"]])
-                labels.extend(val_dict["moas1"] + val_dict["moas2"])
-
-            self.logger.experiment.add_embedding(
-                embedding, metadata=labels, global_step=self.current_epoch
-            )
-
-        loss = torch.mean(
-            torch.stack([val_dict["val_loss"] for val_dict in validation_step_outputs])
-        )
         return loss
 
     def val_dataloader(self):
         return DataLoader(
             self.te_data,
-            batch_size=args.batch,
+            batch_size=self.args.batch,
             num_workers=os.cpu_count(),
             pin_memory=True,
+            persistent_workers=True,
         )
 
     def configure_optimizers(self):
@@ -147,10 +130,11 @@ if __name__ == "__main__":
     logger = TensorBoardLogger("runs", name="janus", default_hp_metric=False)
 
     trainer = pl.Trainer.from_argparse_args(
-        args, callbacks=[checkpoint_callback], logger=logger
+        args, callbacks=[checkpoint_callback], accelerator="dp", logger=logger
     )
 
     model = Janus(
+        args,
         margin=args.margin,
         p_dropout=args.dropout,
         split_by=args.split,
@@ -161,3 +145,8 @@ if __name__ == "__main__":
 
     model.train_test_split(args.data, args.metadata, args.seed)
     trainer.fit(model)
+    trainer.save_checkpoint(
+        "fc_{}_split_{}_dropout_{}_margin_{}.ckpt".format(
+            args.seed, args.split, args.dropout, args.margin
+        )
+    )
