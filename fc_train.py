@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
     checkpoint_callback = ModelCheckpoint(monitor="val_loss")
 
-    logger = TensorBoardLogger("runs", name="janus", default_hp_metric=False)
+    logger = TensorBoardLogger("{}/logs".format(args.data), name="fc", default_hp_metric=False)
 
     trainer = pl.Trainer.from_argparse_args(
         args, callbacks=[checkpoint_callback], accelerator="dp", logger=logger
