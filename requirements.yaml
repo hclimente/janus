@@ -23,7 +23,6 @@ dependencies:
   - pandas
   - pytest-cov
   - pytorch
-  - pytorch-lightning
   - r
   - rpy2
   - r-tidyverse
@@ -36,4 +35,3 @@ dependencies:
   - nextflow
   - jupyterlab
   - ipywidgets
-  - cudatoolkit=11.1

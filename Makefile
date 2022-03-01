@@ -1,8 +1,8 @@
 CONDA_ENV = ./env/
 CONDA_ACTIVATE = eval "$$(conda shell.bash hook)"; conda activate $(CONDA_ENV)
 
-.PHONY: clean setup jn download_data
-all: train
+.PHONY: clean setup jn download_data test
+all: train fc_train 
 
 setup: $(CONDA_ENV) data/boyd_2019/
 	git config core.hooksPath .githooks
@@ -27,6 +27,9 @@ train: src/train.nf
 fc_train: src/fc_train.nf
 	mkdir -p results/boyd_2019
 	$(CONDA_ACTIVATE); nextflow src/fc_train.nf --out results/boyd_2019 -resume -profile gpu --gpus 9
+
+test:
+	$(CONDA_ACTIVATE); python fc_train.py --data data/boyd_2019 --metadata data/boyd_2019_PlateMap-KPP_MOA.xlsx --epochs 1
 
 clean:
 	rm -rf env/
